@@ -1,200 +1,231 @@
 import { CartManager } from './modules/cart.js';
-import { UIManager } from './modules/ui.js';
 
+// --- UI MANAGER CLASS (Inline untuk kemudahan) ---
+class UIManager {
+    constructor() {
+        this.grid = document.getElementById('k-grid');
+        this.cartList = document.getElementById('k-cart-list');
+        this.cartBadge = document.getElementById('k-cart-qty');
+    }
+
+    formatMoney(n) { return 'Rp ' + parseInt(n).toLocaleString('id-ID'); }
+
+    renderProducts(products) {
+        if(!this.grid) return; 
+        
+        if(products.length === 0) {
+            this.grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">Produk tidak ditemukan.</div>';
+            return;
+        }
+
+        const isUserApp = window.location.href.includes('/app');
+        
+        this.grid.innerHTML = products.map(p => {
+            const cardAction = isUserApp ? `onclick="window.location.href='${KRESUBER.site_url}/app/product/${p.id}'"` : ''; 
+            
+            // Logic Ikon Hati
+            const heartClass = p.is_favorite ? 'ri-heart-fill active' : 'ri-heart-line';
+            const btnClass = p.is_favorite ? 'k-btn-fav active' : 'k-btn-fav';
+
+            return `
+            <div class="k-card-prod" ${cardAction} data-product-id="${p.id}">
+                <div class="${btnClass}" onclick="event.stopPropagation(); window.triggerFavorite(${p.id}, this)">
+                    <i class="${heartClass}"></i>
+                </div>
+
+                <img src="${p.image}" class="k-card-img" loading="lazy" alt="${p.name}">
+                <div class="k-card-title">${p.name}</div>
+                <div class="k-card-price">${this.formatMoney(p.price)}</div>
+                
+                <button class="k-btn-add-float" onclick="event.stopPropagation(); window.triggerAdd(${p.id})">
+                    <i class="ri-add-line"></i>
+                </button>
+            </div>
+            `;
+        }).join('');
+    }
+
+    renderCart(state) {
+        if(this.cartBadge) {
+            const totalQty = state.items.reduce((acc, item) => acc + item.qty, 0);
+            this.cartBadge.innerText = totalQty;
+            this.cartBadge.style.display = totalQty > 0 ? 'flex' : 'none';
+        }
+
+        if(!this.cartList) return;
+
+        const checkoutBtn = document.getElementById('k-btn-checkout');
+
+        if (state.items.length === 0) {
+            this.cartList.innerHTML = `<div style="text-align:center; padding:40px; color:#999;"><p>Keranjang kosong.</p></div>`;
+            if(checkoutBtn) checkoutBtn.style.display = 'none';
+            if(document.querySelector('.btn-bill-payment')) document.querySelector('.btn-bill-payment').disabled = true;
+        } else {
+            this.cartList.innerHTML = state.items.map(item => `
+                <div class="pos-cart-item">
+                    <img src="${item.image}" class="pos-cart-item-thumbnail" alt="${item.name}">
+                    <div class="pos-cart-item-details">
+                        <div class="pos-cart-item-name">${item.name}</div>
+                        <div class="pos-cart-item-price-qty">${this.formatMoney(item.price)} x ${item.qty}</div>
+                    </div>
+                    <div class="pos-qty-stepper">
+                        <button onclick="window.triggerUpdate(${item.id}, -1)">-</button>
+                        <span>${item.qty}</span>
+                        <button onclick="window.triggerUpdate(${item.id}, 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            if(document.getElementById('k-subtotal')) document.getElementById('k-subtotal').innerText = this.formatMoney(state.subtotal);
+            if(document.getElementById('k-total')) document.getElementById('k-total').innerText = this.formatMoney(state.total);
+            
+            if(checkoutBtn) checkoutBtn.style.display = 'block';
+            if(document.querySelector('.btn-bill-payment')) document.querySelector('.btn-bill-payment').disabled = false;
+        }
+    }
+
+    renderCategories(categories) {
+        const categoryDropdown = document.querySelector('.pos-category-dropdown');
+        const categoryTabs = document.querySelector('.pos-category-tabs');
+        if (categoryDropdown) { let html = '<option value="all">Semua Kategori</option>'; categories.forEach(cat => { html += `<option value="${cat.slug}">${cat.name}</option>`; }); categoryDropdown.innerHTML = html; }
+        if (categoryTabs) { let html = '<div class="pos-tab-item active" data-slug="all">All</div>'; categories.forEach(cat => { html += `<div class="pos-tab-item" data-slug="${cat.slug}">${cat.name}</div>`; }); categoryTabs.innerHTML = html; }
+    }
+}
+
+// --- MAIN EXECUTION ---
 jQuery(document).ready(function($) {
     const Cart = new CartManager();
     const UI = new UIManager();
     
-    // Cache data
     let productsCache = [];
     let tablesCache = [];
 
-    // --- 1. GLOBAL FUNCTIONS (Diakses oleh HTML onclick="") ---
-
-    // A. Tambah Produk (Default Qty 1) - Dipakai di List Produk
+    // --- 1. GLOBAL FUNCTIONS ---
     window.triggerAdd = (id) => { 
         const p = productsCache.find(x => x.id == id);
         if(p) {
             UI.renderCart(Cart.add(p));
-            // Feedback Visual Kecil pada tombol
+            // Feedback
             const btn = document.querySelector(`button[onclick*="triggerAdd(${id})"] i`);
-            if(btn) { 
-                const originalClass = btn.className;
-                btn.className = 'ri-check-line'; 
-                setTimeout(()=> btn.className = originalClass, 1000); 
-            }
+            if(btn) { const cls = btn.className; btn.className = 'ri-check-line'; setTimeout(()=> btn.className = cls, 1000); }
         }
     };
 
-    // B. Tambah Produk dengan Qty (Custom) - Dipakai di Halaman Detail Produk
     window.triggerAddWithQty = async (id, qty) => {
-        // Cari produk di cache
         let product = productsCache.find(x => x.id == id);
-        
-        // Jika tidak ada di cache (misal: user langsung buka link produk), buat dummy object
-        // Data lengkap akan disinkronkan backend via ID nanti
-        if(!product) {
-            product = { 
-                id: id, 
-                name: 'Produk', // Placeholder
-                price: 0, 
-                image: '',
-                qty: 0 
-            }; 
-        }
-
-        if(product) {
-            // Tambahkan ke Cart Manager (ini akan memicu Sync ke WooCommerce)
-            await Cart.add(product, qty);
-            return true; // Signal sukses ke tombol HTML
-        }
+        if(!product) product = { id: id, name: 'Produk', price: 0, image: '', qty: 0 }; 
+        await Cart.add(product, qty);
+        return true;
     };
 
-    // C. Update Qty di Cart Panel (POS Terminal)
-    window.triggerUpdate = (id, delta) => { 
-        UI.renderCart(Cart.updateQty(id, delta)); 
-    };
+    window.triggerUpdate = (id, delta) => { UI.renderCart(Cart.updateQty(id, delta)); };
+    window.triggerRemove = (id) => { UI.renderCart(Cart.remove(id)); };
 
-    // D. Hapus Item di Cart Panel (POS Terminal)
-    window.triggerRemove = (id) => { 
-        UI.renderCart(Cart.remove(id)); 
-    };
-
-    // E. Manajemen Meja (CRUD)
-    window.triggerAddTable = () => {
-        const name = prompt("Masukkan Nama Meja Baru:");
-        if (name) {
-            const newId = Date.now();
-            tablesCache.push({ id: newId, name: name });
-            saveTables();
-        }
-    };
-    window.triggerEditTable = (idx) => {
-        const newName = prompt("Ubah Nama Meja:", tablesCache[idx].name);
-        if (newName) { tablesCache[idx].name = newName; saveTables(); }
-    };
-    window.triggerDeleteTable = (idx) => {
-        if(confirm("Hapus meja ini?")) { tablesCache.splice(idx, 1); saveTables(); }
-    };
-    window.selectStartTable = (name) => {
-        $('#k-select-table').val(name);
-        $('.nav-link[data-nav="pos-main"]').click(); // Kembali ke tab POS (khusus mode Terminal)
-    };
-
-    // --- 2. INITIALIZATION (Load Data) ---
-    async function init() {
-        console.log("POS App Initializing...");
-        
-        // Load Products
-        try {
-            const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_products', nonce: KRESUBER.nonce });
-            if (res.success) {
-                productsCache = res.data;
-                UI.renderProducts(productsCache); // Render Grid
-                UI.renderCart(Cart.getTotals());  // Render Cart Badge & Panel
+    window.triggerFavorite = async (id, btnElem) => {
+        const p = productsCache.find(x => x.id == id);
+        if(p) {
+            p.is_favorite = !p.is_favorite;
+            const icon = btnElem.querySelector('i');
+            if(p.is_favorite) {
+                btnElem.classList.add('active'); icon.className = 'ri-heart-fill active';
+            } else {
+                btnElem.classList.remove('active'); icon.className = 'ri-heart-line';
+                if(window.location.href.includes('/favorites')) {
+                    const card = btnElem.closest('.k-card-prod');
+                    if(card) card.remove();
+                }
             }
-        } catch (e) { console.error("Product Load Error:", e); }
+            try { await $.post(KRESUBER.ajax_url, { action: 'kresuber_toggle_favorite', id: id }); } catch(e) {}
+        }
+    };
 
-        // Load Categories
-        try {
-            const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_product_categories' });
-            if (res.success) UI.renderCategories(res.data);
-        } catch (e) {}
+    // Table Management Globals
+    window.triggerAddTable = () => { const name = prompt("Nama Meja:"); if(name) { tablesCache.push({id:Date.now(), name:name}); saveTables(); } };
+    window.triggerEditTable = (i) => { const n = prompt("Ubah Nama:", tablesCache[i].name); if(n) { tablesCache[i].name = n; saveTables(); } };
+    window.triggerDeleteTable = (i) => { if(confirm("Hapus?")) { tablesCache.splice(i, 1); saveTables(); } };
+    window.selectStartTable = (n) => { $('#k-select-table').val(n); $('.nav-link[data-nav="pos-main"]').click(); };
 
-        // Load Tables
+    // --- 2. INIT & DATA LOADING ---
+    async function init() {
+        if(window.location.href.includes('/favorites')) {
+            initFavoritesPage();
+        } else {
+            try {
+                const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_products', nonce: KRESUBER.nonce });
+                if (res.success) {
+                    productsCache = res.data;
+                    UI.renderProducts(productsCache);
+                }
+            } catch (e) {}
+        }
+        
+        UI.renderCart(Cart.getTotals());
+
+        try { const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_product_categories' }); if (res.success) UI.renderCategories(res.data); } catch (e) {}
         loadTables();
     }
-    
-    // Jalankan Init
     init();
 
-    // --- 3. NAVIGATION & UI LOGIC ---
+    async function initFavoritesPage() {
+        const grid = document.getElementById('k-grid');
+        if(!grid) return;
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;"><i class="ri-loader-4-line ri-spin" style="font-size:24px; color:#FF6B00;"></i></div>';
+        try {
+            const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_favorites' });
+            if(res.success) {
+                productsCache = res.data;
+                if(productsCache.length === 0) {
+                    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:50px;"><i class="ri-heart-line" style="font-size:48px; color:#ddd;"></i><p>Belum ada favorit.</p></div>`;
+                } else {
+                    UI.renderProducts(productsCache);
+                }
+            }
+        } catch(e) { grid.innerHTML = '<p style="text-align:center;">Gagal memuat favorit.</p>'; }
+    }
 
-    // Tab Navigation (POS Terminal Sidebar)
+    // --- 3. UI LOGIC ---
     $('.nav-link').on('click', function(e) {
         const target = $(this).data('nav');
         if (target) {
             e.preventDefault();
-            $('.nav-link').removeClass('active');
-            $(this).addClass('active');
-            $('.pos-view-section').removeClass('active');
-            $('#view-' + target).addClass('active');
-
+            $('.nav-link').removeClass('active'); $(this).addClass('active');
+            $('.pos-view-section').removeClass('active'); $('#view-' + target).addClass('active');
             if (target === 'orders-history') loadOrdersHistory();
         }
     });
 
-    // Search & Filter Logic
-    $('#k-search').on('input', filterProducts);
-    $('.pos-category-tabs').on('click', '.pos-tab-item', function() {
-        $('.pos-category-tabs .pos-tab-item').removeClass('active');
-        $(this).addClass('active');
-        filterProducts();
-    });
-    $('.pos-category-dropdown').on('change', filterProducts);
-
-    function filterProducts() {
-        const term = $('#k-search').val().toLowerCase();
+    $('#k-search').on('input', function() {
+        const term = $(this).val().toLowerCase();
         const activeTab = $('.pos-category-tabs .pos-tab-item.active').data('slug') || 'all';
         const dropdownVal = $('.pos-category-dropdown').val();
         let catFilter = (activeTab !== 'all') ? activeTab : dropdownVal;
-
+        
         const filtered = productsCache.filter(p => {
             const nameMatch = p.name.toLowerCase().includes(term);
-            // Handle kategori yang mungkin string HTML atau slug
             const pCat = (typeof p.category === 'string') ? p.category.toLowerCase() : '';
             const catMatch = catFilter === 'all' || pCat.includes(catFilter);
             return nameMatch && catMatch;
         });
         UI.renderProducts(filtered);
-    }
+    });
 
-    // --- 4. BACKEND SYNC LOGIC (Tables & Orders) ---
-
-    async function loadTables() {
-        try {
-            const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_manage_tables', nonce: KRESUBER.nonce, mode: 'get' });
-            if (res.success) {
-                tablesCache = res.data;
-                renderTablesSync();
-            }
-        } catch (e) {}
-    }
-
-    async function saveTables() {
-        try {
-            const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_manage_tables', nonce: KRESUBER.nonce, mode: 'save', tables: JSON.stringify(tablesCache) });
-            if (res.success) renderTablesSync();
-        } catch (e) { alert("Gagal menyimpan meja"); }
-    }
-
+    // --- 4. BACKEND SYNC ---
+    async function loadTables() { try { const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_manage_tables', nonce: KRESUBER.nonce, mode: 'get' }); if (res.success) { tablesCache = res.data; renderTablesSync(); } } catch (e) {} }
+    async function saveTables() { try { await $.post(KRESUBER.ajax_url, { action: 'kresuber_manage_tables', nonce: KRESUBER.nonce, mode: 'save', tables: JSON.stringify(tablesCache) }); renderTablesSync(); } catch (e) {} }
+    
     function renderTablesSync() {
-        // Render Dropdown (di Cart Panel)
         const $select = $('#k-select-table');
         if($select.length) {
             const curr = $select.val();
             let opt = '<option value="">Pilih Meja</option>';
             tablesCache.forEach(t => { opt += `<option value="${t.name}">${t.name}</option>`; });
-            $select.html(opt);
-            if(curr) $select.val(curr);
+            $select.html(opt); if(curr) $select.val(curr);
         }
-
-        // Render Grid (di Halaman Manajemen Meja)
         const $grid = $('#k-table-grid');
         if($grid.length) {
             let html = `<div class="table-card add-new" onclick="triggerAddTable()"><i class="ri-add-circle-line" style="font-size:32px; color:var(--k-primary);"></i><h3 class="text-sm">Tambah</h3></div>`;
             tablesCache.forEach((t, i) => {
-                html += `
-                <div class="table-card">
-                    <div class="table-actions">
-                        <i class="ri-pencil-line" onclick="triggerEditTable(${i})"></i>
-                        <i class="ri-close-circle-line delete" onclick="triggerDeleteTable(${i})"></i>
-                    </div>
-                    <div onclick="selectStartTable('${t.name}')">
-                        <i class="ri-restaurant-2-line" style="font-size:24px; color:#ccc;"></i>
-                        <h3 class="text-sm">${t.name}</h3>
-                    </div>
-                </div>`;
+                html += `<div class="table-card"><div class="table-actions"><i class="ri-pencil-line" onclick="triggerEditTable(${i})"></i><i class="ri-close-circle-line delete" onclick="triggerDeleteTable(${i})"></i></div><div onclick="selectStartTable('${t.name}')"><i class="ri-restaurant-2-line" style="font-size:24px; color:#ccc;"></i><h3 class="text-sm">${t.name}</h3></div></div>`;
             });
             $grid.html(html);
         }
@@ -203,50 +234,27 @@ jQuery(document).ready(function($) {
     async function loadOrdersHistory() {
         const $body = $('#k-orders-list-body');
         if(!$body.length) return;
-        
         $body.html('<tr><td colspan="5" style="text-align:center;">Memuat...</td></tr>');
         try {
             const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_orders_history', nonce: KRESUBER.nonce });
             if (res.success && res.data.length > 0) {
                 const rows = res.data.map(o => `<tr><td>#${o.id}</td><td>${o.date}</td><td>${o.table}</td><td>${o.total}</td><td><span class="k-status-badge status-${o.status}">${o.status}</span></td></tr>`).join('');
                 $body.html(rows);
-            } else {
-                $body.html('<tr><td colspan="5" style="text-align:center;">Tidak ada pesanan.</td></tr>');
-            }
-        } catch (e) {
-            $body.html('<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat.</td></tr>');
-        }
+            } else { $body.html('<tr><td colspan="5" style="text-align:center;">Tidak ada pesanan.</td></tr>'); }
+        } catch (e) { $body.html('<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat.</td></tr>'); }
     }
     $('#btn-refresh-orders').on('click', loadOrdersHistory);
 
-    // --- 5. CHECKOUT (POS Terminal Bill & Payment) ---
     $('.btn-bill-payment').on('click', async function() {
         const tableNo = $('#k-select-table').val();
         if (!tableNo) { alert('Silakan pilih Meja terlebih dahulu!'); return; }
-
         if (confirm('Lanjut ke Pembayaran?')) {
-            const $btn = $(this);
-            $btn.prop('disabled', true).text('Memproses...');
-
+            const $btn = $(this); $btn.prop('disabled', true).text('Memproses...');
             try {
-                // Checkout via Cart Manager
                 const res = await Cart.checkout(tableNo, 'dine_in');
-                
-                if (res.payment_url) {
-                    // Redirect ke Custom Payment Page
-                    window.location.href = res.payment_url;
-                } else {
-                    alert('Order berhasil dibuat, silakan cek menu Orders.');
-                    UI.renderCart(Cart.getTotals());
-                    $btn.prop('disabled', false).text('Bill & Payment');
-                }
-            } catch (error) {
-                alert('Gagal: ' + error);
-                $btn.prop('disabled', false).text('Bill & Payment');
-            }
+                if (res.payment_url) { window.location.href = res.payment_url; } 
+                else { alert('Order berhasil, cek menu Orders.'); UI.renderCart(Cart.getTotals()); $btn.prop('disabled', false).text('Bill & Payment'); }
+            } catch (error) { alert('Gagal: ' + error); $btn.prop('disabled', false).text('Bill & Payment'); }
         }
     });
-
-    // Helper Actions
-    $('.btn-kot-print').on('click', () => window.print());
 });
