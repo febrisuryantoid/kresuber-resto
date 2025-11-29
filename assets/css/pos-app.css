@@ -1,26 +1,33 @@
-/* Kresuber POS - Full Responsive Styles */
+/* Kresuber POS - Compiled Styles (Full Rewrite V3) */
 @import './modules/_layout.css';
 @import './modules/_components.css';
 
-:root { --k-primary: #FF6B00; --k-bg: #F8F9FD; --k-surface: #FFF; --k-text-main: #1A1A1A; --k-border: #F0F0F0; }
+:root { --k-primary: #FF6B00; --k-bg: #F8F9FD; --k-surface: #FFF; --k-text-main: #1A1A1A; --k-border: #F0F0F0; --k-radius-md: 12px; }
 
-/* 1. GLOBAL RESET (FULL WIDTH) */
+/* ------------------------------------------------------------------ */
+/* 1. GLOBAL RESET & LAYOUT (FULL RESPONSIVE APP) */
+/* ------------------------------------------------------------------ */
 html, body {
     margin: 0; padding: 0;
     background-color: var(--k-bg) !important;
     font-family: 'Plus Jakarta Sans', sans-serif, system-ui !important;
     -webkit-font-smoothing: antialiased;
     font-size: 14px;
-    overscroll-behavior-y: none; /* Mencegah pull-to-refresh default */
+    overflow-x: hidden; /* Mencegah scroll horizontal */
 }
 
-#wpadminbar, header, footer { display: none !important; }
+/* Sembunyikan Elemen Tema Bawaan WordPress secara Agresif */
+#wpadminbar, header, footer, 
+.elementor-location-header, .elementor-location-footer,
+.site-header, .site-footer { 
+    display: none !important; 
+}
 
-/* CONTAINER UTAMA (Mobile First: 100%) */
+/* Container Utama: Mobile First (Full Width Edge-to-Edge) */
 #k-app-container, 
 .k-checkout-layout, 
 .k-account-shell-wrap, 
-.k-cart-wrap, 
+.k-cart-wrap,
 .k-edit-account-wrap,
 .k-view-order-wrap {
     width: 100%; 
@@ -29,61 +36,159 @@ html, body {
     margin: 0 auto;
     position: relative;
     max-width: 100%;
-    padding-bottom: 80px;
-    display: block;
+    box-shadow: none; 
+    padding-bottom: 80px; /* Ruang untuk Bottom Navbar/Button */
+    display: block; /* Pastikan block agar tidak collapse */
 }
 
-/* Desktop: Max Width 600px (Center) */
+/* Tablet & Desktop: Tampilan Terpusat (Seperti Mobile App di Desktop) */
 @media (min-width: 768px) {
     body { background-color: #F0F2F5 !important; }
-    #k-app-container, .k-checkout-layout, .k-account-shell-wrap, .k-cart-wrap, .k-edit-account-wrap, .k-view-order-wrap {
-        max-width: 600px;
-        box-shadow: 0 0 40px rgba(0,0,0,0.05);
+
+    #k-app-container, 
+    .k-checkout-layout, 
+    .k-account-shell-wrap, 
+    .k-cart-wrap,
+    .k-edit-account-wrap,
+    .k-view-order-wrap {
+        max-width: 600px; /* Batas lebar nyaman untuk mata */
+        background: #fff;
+        box-shadow: 0 0 30px rgba(0,0,0,0.05);
+        min-height: 100vh;
+        margin: 0 auto; /* Tengah layar */
     }
-    .k-bottom-navbar, .k-bottom-bar, .k-action-bar {
-        max-width: 600px; left: 50% !important; transform: translateX(-50%);
+    
+    /* Fix posisi navbar/footer sticky di desktop agar ikut container */
+    .k-bottom-navbar, .k-bottom-bar, .k-cart-summary, .k-p-action {
+        max-width: 600px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        border-radius: 12px 12px 0 0;
     }
 }
 
-/* 2. ACCOUNT & PROFILE (FULL WIDTH HEADER) */
-.k-profile-header {
-    background: linear-gradient(135deg, #FF6B00 0%, #FF8F00 100%);
-    padding: 60px 20px 40px; /* Padding atas lebih besar untuk status bar */
-    text-align: center; color: white;
-    border-radius: 0 0 30px 30px; margin-bottom: 20px;
+/* ------------------------------------------------------------------ */
+/* 2. GRID PRODUK (CATALOG RESPONSIVE) */
+/* ------------------------------------------------------------------ */
+.k-product-grid {
+    display: grid; 
+    gap: 12px; 
+    padding: 15px 20px 100px 20px; 
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr); /* HP: 2 Kolom Default */
 }
-.k-profile-avatar { width: 90px; height: 90px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; margin-bottom: 15px; background: #fff; display: inline-block; }
-.k-profile-name { font-size: 22px; font-weight: 800; margin: 0; color: white; }
+
+/* Mobile Landscape / Tablet Kecil */
+@media (min-width: 576px) { 
+    .k-product-grid { grid-template-columns: repeat(3, 1fr); } 
+}
+
+/* Tablet (iPad Portrait) */
+@media (min-width: 768px) { 
+    .k-product-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } 
+}
+
+/* Desktop */
+@media (min-width: 1200px) { 
+    .k-product-grid { grid-template-columns: repeat(5, 1fr); } 
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. KOMPONEN KARTU PRODUK */
+/* ------------------------------------------------------------------ */
+.k-card-prod { 
+    background: #fff; border-radius: 12px; padding: 10px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--k-border);
+    cursor: pointer; position: relative; display: flex; flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.k-card-prod:hover { 
+    transform: translateY(-4px); 
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+    border-color: var(--k-primary);
+}
+.k-card-prod:active { transform: scale(0.98); }
+
+.k-card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px; margin-bottom: 8px; background: #eee; }
+.k-card-title { font-weight: 700; margin-bottom: 4px; line-height: 1.3; font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 34px; color: var(--k-text-main); }
+.k-card-price { font-weight: 800; color: var(--k-primary); font-size: 14px; margin-top: auto; }
+
+/* Tombol Add (+) */
+.k-btn-add-float { 
+    position: absolute; bottom: 8px; right: 8px; 
+    width: 28px; height: 28px; background: var(--k-primary); color: white; 
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+    font-size: 16px; border: none; cursor: pointer; box-shadow: 0 2px 5px rgba(255, 107, 0, 0.3);
+    transition: transform 0.2s;
+}
+.k-btn-add-float:active { transform: scale(0.9); }
+
+/* Tombol Favorit */
+.k-btn-fav {
+    position: absolute; top: 8px; right: 8px;
+    width: 26px; height: 26px; background: rgba(255,255,255,0.9);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    color: #ccc; font-size: 16px; z-index: 5; border: 1px solid #eee;
+    transition: all 0.2s;
+}
+.k-btn-fav.active { color: #FF4081; border-color: #FF4081; background: #FFF0F5; }
+
+/* ------------------------------------------------------------------ */
+/* 4. ACCOUNT & PROFILE STYLES (FULL WIDTH HEADER) */
+/* ------------------------------------------------------------------ */
+.k-profile-header { 
+    background: linear-gradient(135deg, #FF6B00 0%, #FF8F00 100%); 
+    padding: 50px 20px 40px; /* Lebih tinggi untuk status bar mobile */
+    text-align: center; 
+    color: white; 
+    border-radius: 0 0 30px 30px; 
+    margin-bottom: 25px; 
+}
+.k-profile-avatar { width: 85px; height: 85px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.4); object-fit: cover; margin-bottom: 15px; background: #fff; display: inline-block; }
+.k-profile-name { font-size: 22px; font-weight: 800; margin: 0; color: white; letter-spacing: 0.5px; }
 .k-profile-email { font-size: 14px; opacity: 0.9; margin: 5px 0 0; color: white; }
 
-/* Menu Grid */
-.k-menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 0 20px; }
+/* Grid Menu Akun Responsive */
+.k-menu-grid { display: grid; grid-template-columns: 1fr; gap: 15px; padding: 0 20px; }
+@media (min-width: 600px) { .k-menu-grid { grid-template-columns: 1fr 1fr; } } /* Tablet: 2 Kolom */
+
 .k-menu-item { display: flex; align-items: center; background: #fff; padding: 18px; border-radius: 16px; border: 1px solid #f0f0f0; text-decoration: none; color: #333; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
 .k-menu-item:active { transform: scale(0.98); background: #fafafa; }
 .k-menu-icon { width: 45px; height: 45px; background: #FFF0E6; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--k-primary); font-size: 22px; margin-right: 15px; }
 .k-menu-label { flex-grow: 1; font-weight: 700; font-size: 15px; }
 
-/* 3. ORDER LIST (FULL WIDTH CARDS) */
-.k-order-list-wrap { padding: 10px 20px; display: grid; gap: 15px; }
-.k-order-card-new { background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+/* ------------------------------------------------------------------ */
+/* 5. ORDER LIST & DETAIL (CARDS & BILL STYLE) */
+/* ------------------------------------------------------------------ */
+.k-order-list-wrap { 
+    padding: 20px; 
+    display: grid; gap: 15px; grid-template-columns: 1fr;
+}
+@media(min-width: 768px) { .k-order-list-wrap { grid-template-columns: 1fr 1fr; } }
+
+.k-order-card-new { 
+    background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 16px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin-bottom: 0; /* Margin handled by grid gap */
+}
 .k-ord-head { display: flex; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px dashed #eee; margin-bottom: 12px; }
 .k-ord-id { font-weight: 800; color: #333; font-size: 15px; }
-.k-ord-date { font-size: 13px; color: #888; }
+.k-ord-date { font-size: 12px; color: #888; }
 .k-ord-body { display: flex; align-items: center; margin-bottom: 15px; }
 .k-ord-thumb { width: 60px; height: 60px; border-radius: 10px; background: #f0f0f0; margin-right: 15px; object-fit: cover; }
 .k-ord-info h4 { margin: 0 0 5px 0; font-size: 15px; font-weight: 700; color: #333; }
-.k-ord-total { font-weight: 800; color: var(--k-primary); font-size: 15px; }
+.k-ord-total { font-weight: 800; color: var(--k-primary); }
 .k-ord-footer { display: flex; justify-content: space-between; align-items: center; }
-.k-btn-detail { background: #f5f5f5; padding: 8px 16px; border-radius: 8px; text-decoration: none; color: #333; font-size: 13px; font-weight: 700; }
+.k-btn-detail { background: #f5f5f5; padding: 8px 16px; border-radius: 8px; text-decoration: none; color: #333; font-size: 13px; font-weight: 700; transition: 0.2s; }
+.k-btn-detail:hover { background: #333; color: white; }
 
-/* 4. EDIT PROFILE (FORM STYLE) */
-.k-form-group { margin-bottom: 20px; }
-.k-form-label { display: block; font-weight: 700; margin-bottom: 8px; color: #555; }
-.k-form-input { width: 100%; padding: 14px; border: 1px solid #eee; border-radius: 12px; font-size: 15px; background: #fcfcfc; box-sizing: border-box; }
-.k-form-input:focus { border-color: var(--k-primary); outline: none; background: #fff; }
-.k-btn-save { width: 100%; background: var(--k-primary); color: white; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 16px; border: none; cursor: pointer; margin-top: 10px; }
+/* Status Badges */
+.k-ord-status { font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.status-completed { color: #2E7D32; background: #E8F5E9; }
+.status-processing { color: #EF6C00; background: #FFF3E0; }
+.status-pending { color: #1565C0; background: #E3F2FD; }
+.status-cancelled { color: #C62828; background: #FFEBEE; }
 
-/* 5. VIEW ORDER DETAIL (BILL STYLE) */
+/* Bill Detail Styles */
 .k-bill-card { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #eee; margin: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
 .k-bill-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #555; }
 .k-bill-total { font-weight: 800; font-size: 18px; color: #333; border-top: 1px dashed #eee; padding-top: 15px; margin-top: 15px; }
@@ -91,7 +196,111 @@ html, body {
 .k-bill-item-name { font-weight: 600; color: #333; }
 .k-bill-item-meta { font-size: 12px; color: #888; }
 
-/* 6. IMMERSIVE PRODUCT DETAIL */
+/* ------------------------------------------------------------------ */
+/* 6. CHECKOUT PAYMENT (SINGLE CHECKLIST) */
+/* ------------------------------------------------------------------ */
+/* Sembunyikan radio button asli browser */
+.woocommerce-checkout-payment ul.payment_methods li input[type=radio] {
+    opacity: 0; position: absolute; width: 0; height: 0; margin: 0;
+}
+
+/* Style Kartu Pembayaran */
+.woocommerce-checkout-payment ul.payment_methods { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+/* Di Tablet/Desktop, payment method bisa 2 kolom */
+@media(min-width: 768px) { .woocommerce-checkout-payment ul.payment_methods { grid-template-columns: 1fr 1fr; } }
+
+.woocommerce-checkout-payment ul.payment_methods li label {
+    display: flex !important; align-items: center; width: 100%; height: 100%;
+    background: #fff; padding: 16px; border-radius: 12px;
+    border: 1px solid var(--k-border); cursor: pointer;
+    transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+/* Icon & Text */
+.woocommerce-checkout-payment ul.payment_methods li label img { max-height: 24px; margin-right: 15px; width: auto; object-fit: contain; }
+.woocommerce-checkout-payment ul.payment_methods li label { font-weight: 700; color: #333; font-size: 14px; }
+
+/* Checklist Indicator (Kanan) - Default: Lingkaran Kosong */
+.woocommerce-checkout-payment ul.payment_methods li label::after {
+    content: ''; margin-left: auto; flex-shrink: 0;
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid #ddd; background: #fff;
+    transition: 0.2s;
+}
+
+/* State Checked: Lingkaran Oranye + Centang */
+.woocommerce-checkout-payment ul.payment_methods li input[type=radio]:checked + label {
+    border-color: var(--k-primary); background-color: #FFFbf0;
+    transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 107, 0, 0.1);
+}
+.woocommerce-checkout-payment ul.payment_methods li input[type=radio]:checked + label::after {
+    border-color: var(--k-primary); background-color: var(--k-primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='14' height='14' fill='white'%3E%3Cpath d='M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: center;
+}
+
+.payment_box { display: none !important; }
+
+/* ------------------------------------------------------------------ */
+/* 7. NAVIGATION & HEADER STYLES */
+/* ------------------------------------------------------------------ */
+.k-header { 
+    padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; 
+    background: #fff; position: sticky; top: 0; z-index: 50; 
+    border-bottom: 1px solid #f5f5f5; width: 100%;
+}
+.k-page-title { font-size: 18px; font-weight: 800; color: #1a1a1a; margin: 0; text-align: center; flex-grow: 1; }
+.k-btn-back { font-size: 24px; color: #333; text-decoration: none; display: flex; }
+
+/* Navbar Bawah Fixed */
+.k-bottom-navbar, .k-bottom-bar {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: #fff; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+    /* Mobile: Full Span */
+    max-width: 100%; left: 0; transform: none;
+}
+
+.k-bottom-navbar { padding: 10px 0; display: flex; justify-content: space-around; }
+.k-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; font-size: 11px; font-weight: 600; transition: 0.2s; }
+.k-nav-item:hover { color: var(--k-primary); }
+.k-nav-item i { font-size: 24px; margin-bottom: 3px; }
+.k-nav-item.active { color: var(--k-primary); }
+
+/* Tombol Confirm Sticky */
+.k-btn-confirm {
+    display: block; width: calc(100% - 40px); margin: 15px 20px;
+    background: var(--k-primary); color: white; padding: 16px;
+    text-align: center; border-radius: 14px; font-weight: 800; font-size: 16px;
+    border: none; cursor: pointer; text-decoration: none; box-shadow: 0 10px 20px rgba(255, 107, 0, 0.2);
+}
+.k-btn-confirm:hover { background: #e65100; transform: translateY(-2px); }
+
+/* ------------------------------------------------------------------ */
+/* 8. TABLE MANAGEMENT STYLES */
+/* ------------------------------------------------------------------ */
+.text-sm { font-size: 13px !important; font-weight: 600; margin-top: 8px; color: #444; }
+.table-card { position: relative; background: white; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #eee; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.table-card:hover { border-color: var(--k-primary); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+.table-card.add-new { border: 2px dashed #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fcfcfc; }
+.table-card.add-new:hover { border-color: var(--k-primary); background: #fff; }
+.table-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s; }
+.table-card:hover .table-actions { opacity: 1; }
+.table-actions i { font-size: 16px; padding: 4px; border-radius: 50%; background: #eee; color: #666; cursor: pointer; }
+.table-actions i:hover { background: var(--k-primary); color: white; }
+.table-actions i.delete:hover { background: #ff4444; }
+
+/* ------------------------------------------------------------------ */
+/* 9. FORM STYLES (Edit Profile) */
+/* ------------------------------------------------------------------ */
+.k-form-group { margin-bottom: 20px; }
+.k-form-label { display: block; font-weight: 700; margin-bottom: 8px; color: #555; }
+.k-form-input { width: 100%; padding: 14px; border: 1px solid #eee; border-radius: 12px; font-size: 15px; background: #fcfcfc; box-sizing: border-box; }
+.k-form-input:focus { border-color: var(--k-primary); outline: none; background: #fff; }
+.k-btn-save { width: 100%; background: var(--k-primary); color: white; padding: 16px; border-radius: 14px; font-weight: 800; font-size: 16px; border: none; cursor: pointer; margin-top: 10px; }
+
+/* ------------------------------------------------------------------ */
+/* 10. IMMERSIVE PRODUCT DETAIL */
+/* ------------------------------------------------------------------ */
 .k-p-img-box {
     width: 100%; height: 45vh; /* Hampir setengah layar */
     background: #f0f0f0; position: relative;
