@@ -31,6 +31,10 @@ jQuery(document).ready(function($) {
                 console.log("Products Loaded:", productRes.data.length);
                 productsCache = productRes.data;
                 UI.renderProducts(productsCache);
+
+                // Initial render of cart, after products are loaded
+                UI.renderCart(Cart.getTotals());
+
             } else {
                 console.error("Failed to load products", productRes.data);
                 $('#k-grid').html('<p style="color:red; padding:20px;">Gagal memuat produk.</p>');
@@ -46,6 +50,7 @@ jQuery(document).ready(function($) {
             if (categoryRes.success) {
                 console.log("Categories Loaded:", categoryRes.data.length);
                 UI.renderCategories(categoryRes.data);
+                filterAndRenderProducts(); // Apply initial filter (e.g., 'All') after categories are loaded
             } else {
                 console.error("Failed to load categories", categoryRes.data);
             }
@@ -55,8 +60,6 @@ jQuery(document).ready(function($) {
     }
 
     init();
-
-    // Search Handler
     $('#k-search').on('input', function() {
         const term = $(this).val().toLowerCase();
         const filtered = productsCache.filter(p => p.name.toLowerCase().includes(term));
