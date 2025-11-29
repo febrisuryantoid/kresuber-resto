@@ -1,12 +1,6 @@
 export class CartManager {
-    constructor() { 
-        this.items = []; 
-        this.taxRate = 10; 
-    }
-    
-    init(taxRate) { 
-        this.taxRate = taxRate || 10; 
-    }
+    constructor() { this.items = []; this.taxRate = 10; }
+    init(taxRate) { this.taxRate = taxRate || 10; }
     
     add(product) {
         const existing = this.items.find(i => i.id === product.id);
@@ -27,7 +21,7 @@ export class CartManager {
         this.items = this.items.filter(i => i.id !== id);
         return this.getTotals();
     }
-
+    
     clear() {
         this.items = [];
         return this.getTotals();
@@ -39,16 +33,15 @@ export class CartManager {
         return { items: this.items, subtotal, tax, total: subtotal + tax };
     }
 
-    // FUNGSI BARU: Mengirim data ke API WordPress
+    // FUNGSI CHECKOUT
     async checkout(tableNo, diningType) {
         if (this.items.length === 0) {
             throw new Error("Keranjang kosong!");
         }
 
-        // Gunakan jQuery AJAX agar kompatibel dengan wp_localize_script
         return new Promise((resolve, reject) => {
             jQuery.post(KRESUBER.ajax_url, {
-                action: 'kresuber_process_order',
+                action: 'kresuber_process_order', // Sesuai endpoint API baru
                 nonce: KRESUBER.nonce,
                 items: JSON.stringify(this.items),
                 table_no: tableNo,
@@ -56,14 +49,15 @@ export class CartManager {
             })
             .done(response => {
                 if (response.success) {
-                    this.clear(); // Kosongkan keranjang setelah sukses
-                    resolve(response.data);
+                    this.clear(); // Bersihkan keranjang
+                    // Resolve dengan SELURUH data (termasuk payment_url)
+                    resolve(response.data); 
                 } else {
-                    reject(response.data.message || 'Terjadi kesalahan.');
+                    reject(response.data.message || 'Terjadi kesalahan server.');
                 }
             })
             .fail(err => {
-                reject('Koneksi server gagal.');
+                reject('Koneksi gagal.');
             });
         });
     }
