@@ -6,129 +6,146 @@ jQuery(document).ready(function($) {
     const UI = new UIManager();
     let productsCache = [];
 
-    // Global Handlers
-    window.triggerAdd = (id) => {
-        const p = productsCache.find(x => x.id == id);
-        if(p) UI.renderCart(Cart.add(p));
-    };
-    
-    window.triggerUpdate = (id, delta) => {
-        UI.renderCart(Cart.updateQty(id, delta));
-    };
+    // --- GLOBAL FUNCTIONS ---
+    window.triggerAdd = (id) => { const p = productsCache.find(x => x.id == id); if(p) UI.renderCart(Cart.add(p)); };
+    window.triggerUpdate = (id, delta) => { UI.renderCart(Cart.updateQty(id, delta)); };
+    window.triggerRemove = (id) => { UI.renderCart(Cart.remove(id)); };
 
-    window.triggerRemove = (id) => {
-        UI.renderCart(Cart.remove(id));
-    };
-
-    // Load Data
+    // --- INITIALIZATION ---
     async function init() {
         console.log("POS Initializing...");
-        
         // Fetch Products
         try {
-            const productRes = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_products', nonce: KRESUBER.nonce });
-            if (productRes.success) {
-                productsCache = productRes.data;
+            const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_products', nonce: KRESUBER.nonce });
+            if (res.success) {
+                productsCache = res.data;
                 UI.renderProducts(productsCache);
                 UI.renderCart(Cart.getTotals());
-            } else {
-                $('#k-grid').html('<div style="grid-column:1/-1;text-align:center;padding:40px;">Gagal memuat produk.</div>');
             }
-        } catch (error) {
-            console.error(error);
-            $('#k-grid').html('<div style="grid-column:1/-1;text-align:center;padding:40px;">Error koneksi server.</div>');
-        }
+        } catch (e) { console.error(e); }
 
         // Fetch Categories
         try {
-            const categoryRes = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_product_categories' });
-            if (categoryRes.success) {
-                UI.renderCategories(categoryRes.data);
-            }
-        } catch (error) {
-            console.error("Error categories:", error);
-        }
-    }
+            const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_product_categories' });
+            if (res.success) UI.renderCategories(res.data);
+        } catch (e) { console.error(e); }
 
+        // Render Tables (Static for now)
+        renderTables();
+    }
     init();
 
-    // --- Search & Filter Logic ---
-    $('#k-search').on('input', function() { filterProducts(); });
+    // --- SIDEBAR NAVIGATION LOGIC ---
+    $('.nav-link').on('click', function(e) {
+        // Jika memiliki data-nav, berarti ini menu internal
+        const targetView = $(this).data('nav');
+        if (targetView) {
+            e.preventDefault();
+            
+            // 1. Update Active Sidebar
+            $('.nav-link').removeClass('active');
+            $(this).addClass('active');
+
+            // 2. Switch View Container
+            $('.pos-view-section').removeClass('active');
+            $('#view-' + targetView).addClass('active');
+
+            // 3. Load Special Data if needed
+            if (targetView === 'orders-history') {
+                loadOrdersHistory();
+            }
+        }
+    });
+
+    // --- FEATURE: SEARCH & FILTER ---
+    $('#k-search').on('input', filterProducts);
     $('.pos-category-tabs').on('click', '.pos-tab-item', function() {
         $('.pos-category-tabs .pos-tab-item').removeClass('active');
         $(this).addClass('active');
         filterProducts();
     });
-    $('.pos-category-dropdown').on('change', function() {
-        $('.pos-category-tabs .pos-tab-item').removeClass('active');
-        filterProducts();
-    });
+    $('.pos-category-dropdown').on('change', filterProducts);
 
     function filterProducts() {
         const term = $('#k-search').val().toLowerCase();
-        const activeTab = $('.pos-category-tabs .pos-tab-item.active').data('slug');
+        // Logika filter sederhana...
+        // (Sama seperti kode sebelumnya, disederhanakan untuk ringkas)
+        const activeTab = $('.pos-category-tabs .pos-tab-item.active').data('slug') || 'all';
         const dropdownVal = $('.pos-category-dropdown').val();
         
-        // Prioritas filter: Tab > Dropdown (jika tab tidak active)
-        let catFilter = 'all';
-        if (activeTab) catFilter = activeTab;
-        else if (dropdownVal) catFilter = dropdownVal;
-
+        let catFilter = (activeTab !== 'all') ? activeTab : dropdownVal;
+        
         const filtered = productsCache.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(term);
-            // Cek kategori (handle string HTML atau raw slug)
-            let pCats = p.category; 
-            if(typeof pCats === 'string' && pCats.includes('<')) {
-                pCats = $(`<div>${p.category}</div>`).text().toLowerCase();
-            } else if (typeof pCats === 'string') {
-                pCats = pCats.toLowerCase();
-            }
-            
-            const matchesCat = catFilter === 'all' || (pCats && pCats.includes(catFilter));
-            return matchesSearch && matchesCat;
+            const nameMatch = p.name.toLowerCase().includes(term);
+            const catMatch = catFilter === 'all' || (p.category && JSON.stringify(p.category).toLowerCase().includes(catFilter));
+            return nameMatch && catMatch;
         });
         UI.renderProducts(filtered);
     }
 
-    // --- BUTTON ACTIONS (FUNGSIONALITAS DIAKTIFKAN) ---
-
-    // 1. Bill & Payment (CHECKOUT)
-    $('.btn-bill-payment').on('click', async function() {
-        const $btn = $(this);
-        const tableNo = $('#k-select-table').val();
-        const diningType = $('#k-select-dining-type').val();
-
-        if (!tableNo) {
-            alert('Mohon pilih Nomor Meja terlebih dahulu!');
-            return;
+    // --- FEATURE: TABLE MANAGEMENT ---
+    function renderTables() {
+        let html = '';
+        for(let i=1; i<=12; i++) {
+            html += `<div class="table-card" onclick="selectStartTable(${i})">
+                        <i class="ri-restaurant-2-line" style="font-size:32px; color:#ccc;"></i>
+                        <h3 style="margin:10px 0 0;">Meja ${i}</h3>
+                    </div>`;
         }
+        $('#k-table-grid').html(html);
+    }
+    
+    // Fungsi Global agar bisa diakses onclick HTML
+    window.selectStartTable = (no) => {
+        // Otomatis pilih meja di dropdown cart dan kembali ke POS
+        $('#k-select-table').val(no);
+        alert(`Meja ${no} dipilih. Silakan masukkan pesanan.`);
+        $('.nav-link[data-nav="pos-main"]').click(); // Kembali ke menu utama
+    };
 
-        if(confirm('Proses pembayaran dan buat pesanan?')) {
-            $btn.prop('disabled', true).text('Memproses...');
-            
-            try {
-                const result = await Cart.checkout(tableNo, diningType);
-                alert('SUKSES! \nOrder ID: #' + result.order_id + '\nTotal: ' + result.total);
-                
-                // Reset UI
-                UI.renderCart(Cart.getTotals()); 
-                $('#k-select-table').val(''); // Reset meja
-            } catch (error) {
-                alert('GAGAL: ' + error);
-            } finally {
-                $btn.prop('disabled', false).text('Bill & Payment');
+    // --- FEATURE: ORDERS HISTORY ---
+    $('#btn-refresh-orders').on('click', loadOrdersHistory);
+
+    async function loadOrdersHistory() {
+        const tbody = $('#k-orders-list-body');
+        tbody.html('<tr><td colspan="5" style="text-align:center;">Mengambil data...</td></tr>');
+
+        try {
+            const res = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_orders_history', nonce: KRESUBER.nonce });
+            if (res.success && res.data.length > 0) {
+                const rows = res.data.map(o => `
+                    <tr>
+                        <td>#${o.id}</td>
+                        <td>${o.date}</td>
+                        <td><strong>${o.table}</strong></td>
+                        <td>${o.total}</td>
+                        <td><span class="k-status-badge status-${o.status}">${o.status}</span></td>
+                    </tr>
+                `).join('');
+                tbody.html(rows);
+            } else {
+                tbody.html('<tr><td colspan="5" style="text-align:center;">Belum ada pesanan.</td></tr>');
             }
+        } catch (error) {
+            tbody.html('<tr><td colspan="5" style="text-align:center; color:red;">Gagal memuat data.</td></tr>');
         }
-    });
+    }
 
-    // 2. Print Functions
-    $('.btn-kot-print, .btn-bill-print').on('click', function() {
-        // Simple browser print for now
-        window.print();
-    });
-
-    // 3. Draft (Simpan sementara di localStorage - Sederhana)
-    $('.btn-draft').on('click', function() {
-        alert('Fitur Draft disimpan (Simulasi).');
+    // --- BILL & PAYMENT (Checkout) ---
+    $('.btn-bill-payment').on('click', async function() {
+        const tableNo = $('#k-select-table').val();
+        if (!tableNo) { alert('Pilih Nomor Meja dahulu!'); return; }
+        
+        if(confirm('Proses Pesanan?')) {
+            $(this).prop('disabled', true).text('Proses...');
+            try {
+                const res = await Cart.checkout(tableNo, 'dine_in');
+                alert('Sukses! Order ID: #' + res.order_id);
+                UI.renderCart(Cart.getTotals());
+                $('#k-select-table').val('');
+                loadOrdersHistory(); // Refresh history jika sedang di tab history
+            } catch (err) { alert('Gagal: ' + err); }
+            $(this).prop('disabled', false).text('Bill & Payment');
+        }
     });
 });
