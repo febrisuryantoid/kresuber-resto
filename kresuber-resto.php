@@ -2,15 +2,15 @@
 /*
 Plugin Name: Kresuber Resto
 Plugin URI: https://resto.kresuber.co.id/
-Description: Shortcodes for POS/App, Demo Product Importer, Responsive Product Grid, Product Detail Page, Dynamic Bottom Navbar, WooCommerce Account Integration. FIXES: Improved Product Import.
-Version: 1.1.7
+Description: Shortcodes for POS/App, Demo Product Importer, Responsive Product Grid, Product Detail Page, Dynamic Bottom Navbar, WooCommerce Account Integration. FIXES: Improved Product Import & UI Customizer.
+Version: 1.1.8
 Author: Kresuber Digital
 Author URI: https://resto.kresuber.co.id/
 Text Domain: kresuber-resto
 */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'KRESUBER_VERSION', '1.1.7' );
+define( 'KRESUBER_VERSION', '1.1.8' );
 define( 'KRESUBER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'KRESUBER_URL', plugin_dir_url( __FILE__ ) );
 define( 'KRESUBER_NONCE', 'kresuber_pos_secure' );
@@ -36,5 +36,11 @@ register_activation_hook(__FILE__, function() {
     add_rewrite_rule('^app/?$', 'index.php?kresuber_endpoint=app', 'top');
     flush_rewrite_rules();
 });
+
+// LOAD CUSTOMIZER (Fitur Pengaturan Tampilan)
+// Memastikan file class customizer dimuat agar menu "Kresuber POS App" muncul di Appearance > Customize
+if ( file_exists( KRESUBER_PATH . 'includes/admin/class-pos-customizer.php' ) ) {
+    require_once KRESUBER_PATH . 'includes/admin/class-pos-customizer.php';
+}
 
 add_action('plugins_loaded', function() { new Kresuber_POS_Core(); });
