@@ -6,6 +6,8 @@ class Kresuber_POS_Api {
         add_action('wp_ajax_nopriv_kresuber_get_products', [$this, 'get_products']); // Allow App User to see products
         add_action('wp_ajax_kresuber_sync_cart', [$this, 'sync_cart']);
         add_action('wp_ajax_nopriv_kresuber_sync_cart', [$this, 'sync_cart']);
+        add_action('wp_ajax_kresuber_get_product_categories', [$this, 'get_product_categories']);
+        add_action('wp_ajax_nopriv_kresuber_get_product_categories', [$this, 'get_product_categories']);
     }
 
     public function get_init() {
@@ -72,5 +74,26 @@ class Kresuber_POS_Api {
         }
 
         wp_send_json_success(['message' => 'Cart synced successfully.']);
+    }
+
+    public function get_product_categories() {
+        // No nonce check needed if categories are public
+
+        $product_categories = get_terms([
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => true,
+            'fields'     => 'all',
+        ]);
+
+        $categories_data = [];
+        foreach ($product_categories as $category) {
+            $categories_data[] = [
+                'id'   => $category->term_id,
+                'name' => $category->name,
+                'slug' => $category->slug,
+            ];
+        }
+
+        wp_send_json_success($categories_data);
     }
 }
