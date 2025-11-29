@@ -1,66 +1,109 @@
 <?php
 /**
- * Custom Cart Page
- *
- * This template can be overridden by copying it to yourtheme/woocommerce/cart/cart.php.
- *
- * HOWEVER, on occasion WooCommerce will need to update template files and you
- * (the theme developer) will need to copy the new files to your theme to
- * maintain compatibility. We try to do this as little as possible, but it does
- * happen. When this occurs the version of the template file will be bumped and
- * the readme will list any important changes.
- *
- * @see     https://docs.woocommerce.com/document/template-structure/
- * @package WooCommerce\Templates
- * @version 7.0.1
+ * Custom Mobile Cart Template
+ * Override: templates/woocommerce/cart/cart.php
  */
-
 defined( 'ABSPATH' ) || exit;
+?>
 
-do_action( 'woocommerce_before_cart' ); ?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Keranjang Saya</title>
+    <?php wp_head(); ?>
+    <style>
+        body { background: #F8F9FD; padding-bottom: 120px; }
+        .k-cart-header { padding: 20px; display: flex; align-items: center; background: #fff; position: sticky; top: 0; z-index: 10; }
+        .k-page-title { flex-grow: 1; text-align: center; font-size: 18px; font-weight: 700; margin: 0; }
+        
+        .k-cart-list { padding: 20px; }
+        .k-cart-item { background: #fff; padding: 15px; border-radius: 16px; display: flex; align-items: center; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .k-cart-img { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; margin-right: 15px; background: #eee; }
+        .k-cart-info { flex-grow: 1; }
+        .k-cart-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #1a1a1a; }
+        .k-cart-meta { font-size: 13px; color: #FF6B00; font-weight: 600; }
+        
+        .k-cart-actions { display: flex; align-items: center; gap: 10px; }
+        .k-qty-btn-mini { width: 28px; height: 28px; background: #f0f0f0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .k-cart-summary {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #fff; padding: 20px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+            border-radius: 24px 24px 0 0; z-index: 100;
+        }
+        .k-sum-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; color: #666; }
+        .k-sum-row.total { font-size: 18px; font-weight: 800; color: #1a1a1a; margin-top: 10px; margin-bottom: 20px; }
+        
+        .k-btn-checkout {
+            display: block; width: 100%; padding: 16px;
+            background: #FF6B00; color: white; text-align: center;
+            border-radius: 16px; text-decoration: none; font-weight: 700; font-size: 16px;
+        }
+    </style>
+</head>
+<body class="kresuber-app-mode">
 
-<form class="woocommerce-cart-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
-	<?php do_action( 'woocommerce_before_cart_table' ); ?>
+    <div class="k-cart-header">
+        <a href="<?php echo home_url('/app'); ?>" style="color:#1a1a1a; font-size:24px; text-decoration:none;"><i class="ri-arrow-left-s-line"></i></a>
+        <h1 class="k-page-title">Keranjang Saya</h1>
+        <div style="width:24px;"></div> </div>
 
-	<table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents" cellspacing="0">
-		<thead>
-			<tr>
-				<th class="product-remove">&nbsp;</th>
-				<th class="product-thumbnail">&nbsp;</th>
-				<th class="product-name"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-				<th class="product-price"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
-				<th class="product-quantity"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
-				<th class="product-subtotal"><?php esc_html_e( 'Subtotal', 'woocommerce' ); ?></th>
-			</tr>
-		</thead>
-		<tbody>
-			<?php do_action( 'woocommerce_before_cart_contents' ); ?>
+    <div class="k-cart-list">
+        <?php if ( WC()->cart->is_empty() ) : ?>
+            <div style="text-align:center; padding:50px 20px;">
+                <i class="ri-shopping-cart-line" style="font-size:48px; color:#ddd;"></i>
+                <h3 style="color:#999;">Keranjang masih kosong</h3>
+                <a href="<?php echo home_url('/app'); ?>" class="k-link-add">Mulai Belanja</a>
+            </div>
+        <?php else : ?>
+            <?php foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) : 
+                $_product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+                $product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
+                
+                if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_cart_item_visible', true, $cart_item, $cart_item_key ) ) :
+                    $image = wp_get_attachment_image_url($_product->get_image_id(), 'thumbnail');
+                    if(!$image) $image = 'https://placehold.co/60x60';
+                    ?>
+                    <div class="k-cart-item">
+                        <img src="<?php echo esc_url($image); ?>" class="k-cart-img">
+                        <div class="k-cart-info">
+                            <div class="k-cart-name"><?php echo $_product->get_name(); ?></div>
+                            <div class="k-cart-meta">
+                                <?php echo WC()->cart->get_product_price( $_product ); ?> x <?php echo $cart_item['quantity']; ?>
+                            </div>
+                        </div>
+                        <div class="k-cart-actions">
+                            <?php echo apply_filters( 'woocommerce_cart_item_remove_link', sprintf(
+                                '<a href="%s" class="remove" aria-label="%s" data-product_id="%s" data-product_sku="%s"><i class="ri-delete-bin-line" style="color:red; font-size:20px;"></i></a>',
+                                esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
+                                esc_html__( 'Remove this item', 'woocommerce' ),
+                                esc_attr( $product_id ),
+                                esc_attr( $_product->get_sku() )
+                            ), $cart_item_key ); ?>
+                        </div>
+                    </div>
+                <?php endif; 
+            endforeach; ?>
+        <?php endif; ?>
+    </div>
 
-			<?php
-			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-				// ... (Loop contents will be added here if needed)
-			}
-			?>
+    <?php if ( ! WC()->cart->is_empty() ) : ?>
+    <div class="k-cart-summary">
+        <div class="k-sum-row">
+            <span>Subtotal</span>
+            <span><?php wc_cart_totals_subtotal_html(); ?></span>
+        </div>
+        <div class="k-sum-row total">
+            <span>Total</span>
+            <span><?php wc_cart_totals_order_total_html(); ?></span>
+        </div>
+        <a href="<?php echo wc_get_checkout_url(); ?>" class="k-btn-checkout">Checkout Now</a>
+    </div>
+    <?php endif; ?>
 
-			<?php do_action( 'woocommerce_cart_contents' ); ?>
-			<?php do_action( 'woocommerce_after_cart_contents' ); ?>
-		</tbody>
-	</table>
-	<?php do_action( 'woocommerce_after_cart_table' ); ?>
-</form>
-
-<?php do_action( 'woocommerce_before_cart_collaterals' ); ?>
-
-<div class="cart-collaterals">
-	<?php
-		/**
-		 * Cart collaterals hook.
-		 *
-		 * @hooked woocommerce_cross_sell_display
-		 * @hooked woocommerce_cart_totals - 10
-		 */
-		do_action( 'woocommerce_cart_collaterals' );
-	?>
-</div>
-
-<?php do_action( 'woocommerce_after_cart' ); ?>
+    <?php wp_footer(); ?>
+</body>
+</html>
