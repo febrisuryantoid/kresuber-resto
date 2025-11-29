@@ -4,19 +4,33 @@ class Kresuber_POS_Core {
         add_action('init', [$this, 'rewrites']);
         add_action('template_redirect', [$this, 'load_template']);
         add_action('wp_enqueue_scripts', [$this, 'assets']);
-        add_filter('script_loader_tag', [$this, 'add_type_attribute'], 10, 3); // FIX JS MODULE
+        add_filter('script_loader_tag', [$this, 'add_type_attribute'], 10, 3);
         
         // Shortcodes
         add_shortcode('kresuber_pos_terminal', [$this, 'render_pos_terminal']);
         add_shortcode('kresuber_pos_app', [$this, 'render_pos_app']);
 
-        // WooCommerce Template Override
-        add_filter('woocommerce_template_path', function() {
-            return 'templates/woocommerce/';
-        }, 1, 0);
+        // --- FIX: MEMAKSA WOOCOMMERCE MENGGUNAKAN TEMPLATE DARI PLUGIN ---
+        add_filter('woocommerce_locate_template', [$this, 'override_wc_templates'], 10, 3);
 
         new Kresuber_POS_Admin();
         new Kresuber_POS_Api();
+    }
+
+    // Fungsi Utama untuk Override Template WooCommerce
+    public function override_wc_templates($template, $template_name, $template_path) {
+        // Path ke folder template di dalam plugin ini
+        $plugin_path = KRESUBER_PATH . 'templates/woocommerce/';
+        
+        // Cek apakah file template tersebut ada di folder plugin kita
+        // Contoh: mengecek templates/woocommerce/checkout/form-pay.php
+        $file = $plugin_path . $template_name;
+
+        if (file_exists($file)) {
+            return $file; // Gunakan file dari plugin
+        }
+
+        return $template; // Gunakan default (dari tema) jika tidak ada di plugin
     }
 
     public function rewrites() {
@@ -31,7 +45,7 @@ class Kresuber_POS_Core {
     public function load_template() {
         global $post;
         if (is_object($post) && (has_shortcode($post->post_content, 'kresuber_pos_terminal') || has_shortcode($post->post_content, 'kresuber_pos_app'))) {
-            return; // Biarkan shortcode yang menangani
+            return; 
         }
 
         $endpoint = get_query_var('kresuber_endpoint');
@@ -55,7 +69,8 @@ class Kresuber_POS_Core {
 
     public function assets() {
         global $post;
-        $is_wc_page = function_exists('is_cart') && (is_cart() || is_checkout() || is_account_page());
+        // Logic load assets lebih longgar agar CSS juga termuat di halaman Checkout WooCommerce
+        $is_wc_page = function_exists('is_cart') && (is_cart() || is_checkout() || is_account_page() || is_wc_endpoint_url('order-pay'));
         $has_shortcode = is_object($post) && (has_shortcode($post->post_content, 'kresuber_pos_terminal') || has_shortcode($post->post_content, 'kresuber_pos_app'));
         $is_app_page = in_array(get_query_var('kresuber_endpoint'), ['app', 'app_favorites', 'app_orders', 'app_account']);
 
@@ -69,7 +84,6 @@ class Kresuber_POS_Core {
         // JS - Load as Module
         wp_enqueue_script('k-pos-app', KRESUBER_URL . 'assets/js/pos-app.js', ['jquery'], KRESUBER_VERSION, true);
         
-        // GLOBAL VARIABLE FIX
         wp_localize_script('k-pos-app', 'KRESUBER', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce(KRESUBER_NONCE),
@@ -77,13 +91,11 @@ class Kresuber_POS_Core {
         ]);
     }
 
-    // Fix for <script type="module">
     public function add_type_attribute($tag, $handle, $src) {
         if ('k-pos-app' !== $handle) return $tag;
         return '<script type="module" src="' . esc_url($src) . '"></script>';
     }
 
-    // Shortcode Renderers
     public function render_pos_terminal() {
         if (!current_user_can('edit_products')) return '<p>You do not have permission to view this content.</p>';
         ob_start();
