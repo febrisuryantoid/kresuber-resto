@@ -85,3 +85,22 @@ $order_statuses = wc_get_order_statuses();
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+    jQuery(document).ready(function($) {
+        $('.k-order-filter-tabs .k-tab-item').on('click', function() {
+            $('.k-order-filter-tabs .k-tab-item').removeClass('active');
+            $(this).addClass('active');
+            const statusFilter = $(this).data('status');
+
+            $('.k-order-card').each(function() {
+                const orderStatus = $(this).data('status');
+                if (statusFilter === 'all' || orderStatus === statusFilter) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+    });
+</script>
