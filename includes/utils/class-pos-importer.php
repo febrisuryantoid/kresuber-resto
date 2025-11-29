@@ -35,28 +35,50 @@ class Kresuber_POS_Importer {
     ];
 
     public function import() {
-        if (!function_exists('wc_create_product')) {
+        if (!class_exists('WooCommerce')) {
             return ['success' => false, 'message' => 'WooCommerce is not active.'];
         }
 
         $count = 0;
-        foreach ($this->products as $p) {
+        foreach ($this->products as $index => $p) {
+            // Check if product exists by SKU to prevent duplicates
+            $sku = 'KRSBR-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT);
+            $existing_product = wc_get_product_id_by_sku($sku);
+
+            if ($existing_product) {
+                continue;
+            }
+
             $product = new WC_Product_Simple();
+            
+            // Set properties based on WooCommerce CSV Schema guidance
             $product->set_name($p['name']);
-            $product->set_status('publish');
-            $product->set_catalog_visibility('visible');
-            $product->set_description($p['desc']);
-            $product->set_short_description($p['desc']);
-            $product->set_regular_price(rand(15000, 50000));
+            $product->set_sku($sku); // SKU
+            $product->set_regular_price(rand(15000, 50000)); // Regular price
+            $product->set_description($p['desc']); // Description
+            $product->set_short_description(substr($p['desc'], 0, 150)); // Short description
+            $product->set_status('publish'); // Published = 1
+            $product->set_catalog_visibility('visible'); // Visibility in catalog = visible
+            $product->set_stock_status('instock'); // In stock? = 1
+            $product->set_reviews_allowed(true); // Reviews allowed? = 1
+            $product->set_image_id($this->get_placeholder_image()); // Images
+
             $product_id = $product->save();
             
-            if ($product_id) {
+            if ($product_id && !is_wp_error($product_id)) {
                 $this->add_reviews($product_id);
                 $count++;
             }
         }
+        // Clear caches after import
+        wp_cache_flush();
+        wc_delete_product_transients();
 
-        return ['success' => true, 'message' => "$count produk demo berhasil diimpor."];
+        if ($count > 0) {
+            return ['success' => true, 'message' => "$count produk demo baru berhasil diimpor."];
+        } else {
+            return ['success' => true, 'message' => "Produk demo sudah ada. Tidak ada produk baru yang diimpor."];
+        }
     }
     
     private function add_reviews($product_id) {
@@ -85,8 +107,15 @@ class Kresuber_POS_Importer {
             $comment_id = wp_insert_comment($commentdata);
             
             if($comment_id) {
-                update_comment_meta($comment_id, 'rating', rand(4, 5));
+                // Rating (4 or 5 stars)
+                add_comment_meta($comment_id, 'rating', rand(4, 5), true);
             }
         }
+    }
+
+    private function get_placeholder_image() {
+        // This function could be expanded to download a real image.
+        // For now, we return null so WooCommerce uses its default placeholder.
+        return null;
     }
 }
