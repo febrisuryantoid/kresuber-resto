@@ -56,10 +56,11 @@ class Kresuber_POS_Core {
 
     public function assets() {
         global $post;
-        $is_wc_page = function_exists('is_cart') && (is_cart() || is_checkout());
+        $is_wc_page = function_exists('is_cart') && (is_cart() || is_checkout() || is_account_page());
         $has_shortcode = is_object($post) && (has_shortcode($post->post_content, 'kresuber_pos_terminal') || has_shortcode($post->post_content, 'kresuber_pos_app'));
+        $is_app_page = in_array(get_query_var('kresuber_endpoint'), ['app', 'app_favorites', 'app_orders', 'app_account']);
 
-        if (!get_query_var('kresuber_endpoint') && !$is_wc_page && !$has_shortcode) return;
+        if (!get_query_var('kresuber_endpoint') && !$is_wc_page && !$has_shortcode && !$is_app_page) return;
 
         // CSS
         wp_enqueue_style('k-fonts', 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');

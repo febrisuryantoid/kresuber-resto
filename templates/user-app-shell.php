@@ -23,37 +23,23 @@
         .nav-icon.active { color: #FF6B00; }
     </style>
 </head>
-<body class="kresuber-app-mode">
+<body>
     
-    <div class="app-header">
-        <div class="app-user">
-            <div class="app-avatar">U</div>
-            <div class="app-greeting">
-                <span>Selamat Datang,</span>
-                <h4><?php echo wp_get_current_user()->display_name ?: 'Pelanggan'; ?></h4>
+    <div id="k-app-container">
+        <div class="k-header">
+            <h1 class="k-title">Selamat Datang!</h1>
+            <div class="k-header-actions">
+                <a href="<?php echo wc_get_cart_url(); ?>" class="k-btn-cart">
+                    <i class="ri-shopping-cart-2-line"></i>
+                    <span id="k-cart-qty" class="k-badge">0</span>
+                </a>
             </div>
         </div>
-        
-        <div style="position: relative;">
-            <i class="ri-search-line" style="position: absolute; left: 15px; top: 12px; color: #999;"></i>
-            <input type="text" id="k-search" placeholder="Mau makan apa hari ini?" style="width: 100%; padding: 12px 12px 12px 40px; border: none; background: #f5f5f5; border-radius: 50px; outline: none;">
+        <div class="k-content">
+            <input type="text" id="k-search" placeholder="Cari menu..." class="k-search-input">
+            <div id="k-grid" class="k-product-grid"></div>
         </div>
-    </div>
-
-    <div id="k-grid" class="k-grid-products">
-        <div style="grid-column:1/-1; text-align:center; padding:50px;">
-            <i class="ri-loader-4-line ri-spin" style="font-size:30px; color:#FF6B00;"></i>
-        </div>
-    </div>
-
-    <div class="app-nav">
-        <i class="ri-home-5-fill nav-icon active"></i>
-        <i class="ri-heart-3-line nav-icon"></i>
-        <div style="background: #FF6B00; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -30px; box-shadow: 0 5px 15px rgba(255,107,0,0.3);">
-            <i class="ri-shopping-basket-2-fill"></i>
-        </div>
-        <i class="ri-file-list-3-line nav-icon"></i>
-        <i class="ri-user-3-line nav-icon"></i>
+        <?php include KRESUBER_PATH . 'templates/bottom-navbar.php'; // Include bottom navbar ?>
     </div>
 
     <?php wp_footer(); ?>
