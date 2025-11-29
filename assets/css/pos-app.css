@@ -4,6 +4,8 @@
 
 :root { --k-primary: #FF6B00; --k-bg: #F8F9FD; --k-surface: #FFF; --k-text-main: #1A1A1A; --k-border: #F0F0F0; --k-radius-md: 12px; }
 * { box-sizing: border-box; }
+
+/* Product Card */
 .k-card-prod { background: var(--k-surface); border-radius: 16px; padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; position: relative; }
 .k-card-prod:active { transform: scale(0.97); }
 .k-card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; margin-bottom: 8px; background: #eee; }
@@ -523,4 +525,80 @@
 .k-arrow-icon {
     font-size: 20px;
     color: #ccc;
+}
+
+/* ------------------------------------------------------------------ */
+/* NEW: Table Management Styles (CRUD & Sync Features) */
+/* ------------------------------------------------------------------ */
+
+.text-sm {
+    font-size: 13px !important; /* Memperkecil ukuran font nama meja */
+    font-weight: 600;
+    margin-top: 8px;
+    color: #444;
+}
+
+.table-card {
+    position: relative;
+    background: white;
+    padding: 15px; /* Padding lebih kecil */
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid #eee;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.table-card:hover {
+    border-color: var(--k-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.table-card.add-new {
+    border: 2px dashed #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fcfcfc;
+}
+
+.table-card.add-new:hover {
+    border-color: var(--k-primary);
+    background: #fff;
+}
+
+/* Tombol Edit & Delete Melayang */
+.table-actions {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    gap: 5px;
+    opacity: 0; /* Sembunyi jika tidak dihover */
+    transition: opacity 0.2s;
+}
+
+.table-card:hover .table-actions {
+    opacity: 1; /* Muncul saat dihover */
+}
+
+.table-actions i {
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 50%;
+    background: #eee;
+    color: #666;
+    cursor: pointer;
+}
+
+.table-actions i:hover {
+    background: var(--k-primary);
+    color: white;
+}
+
+.table-actions i.delete:hover {
+    background: #ff4444; /* Merah untuk hapus */
 }
