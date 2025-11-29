@@ -3,7 +3,51 @@
 @import './modules/_components.css';
 
 :root { --k-primary: #FF6B00; --k-bg: #F8F9FD; --k-surface: #FFF; --k-text-main: #1A1A1A; --k-border: #F0F0F0; --k-radius-md: 12px; }
-* { box-sizing: border-box; }
+
+/* RESET GLOBAL AGAR FULL APP */
+html, body {
+    margin: 0; padding: 0;
+    background-color: var(--k-bg) !important;
+    font-family: 'Plus Jakarta Sans', sans-serif, system-ui !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Sembunyikan elemen WordPress Default yang membandel */
+#wpadminbar { display: none !important; }
+header.site-header, footer.site-footer, .elementor-location-header, .elementor-location-footer { 
+    display: none !important; 
+}
+
+/* --- LOGIKA LAYOUT RESPONSIVE --- */
+
+/* 1. KONTAINER UMUM (Untuk Home/Catalog) - LEBAR PENUH & RESPONSIVE GRID */
+#k-app-container {
+    width: 100%;
+    min-height: 100vh;
+    background: #fff;
+    margin: 0 auto;
+}
+
+/* 2. KONTAINER FOKUS (Untuk Cart, Checkout, Akun) - GAYA MOBILE APP */
+/* Agar di Desktop tidak melebar jelek, kita batasi max-width 480px dan taruh di tengah */
+.k-checkout-layout, 
+.k-account-dashboard,
+.k-cart-summary,
+.k-footer-sticky .k-footer-inner,
+.k-bottom-action {
+    max-width: 480px; 
+    margin: 0 auto;
+    left: 0; right: 0; /* Centering fixed elements */
+}
+
+/* Khusus Container Akun & Cart Wrapper */
+.k-account-shell-wrap, .k-cart-wrap {
+    max-width: 480px; 
+    margin: 0 auto; 
+    background: #fff; 
+    min-height: 100vh;
+    box-shadow: 0 0 30px rgba(0,0,0,0.03); /* Efek shadow di desktop */
+}
 
 /* ------------------------------------------------------------------ */
 /* 1. RESPONSIVE GRID CONFIGURATION (HP: 2, Tablet: 4, Desktop: 6) */
