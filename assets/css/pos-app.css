@@ -1,4 +1,7 @@
 /* Kresuber POS - Compiled */
+@import './modules/_layout.css';
+@import './modules/_components.css';
+
 :root { --k-primary: #FF6B00; --k-bg: #F8F9FD; --k-surface: #FFF; --k-text-main: #1A1A1A; --k-border: #F0F0F0; --k-radius-md: 12px; }
 * { box-sizing: border-box; }
 .k-card-prod { background: var(--k-surface); border-radius: 16px; padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; position: relative; }

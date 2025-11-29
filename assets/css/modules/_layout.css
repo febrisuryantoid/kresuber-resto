@@ -1,0 +1,250 @@
+/* Layout styles for POS Terminal */
+
+#pos-app-wrapper {
+    display: grid;
+    grid-template-columns: 250px 1fr 380px; /* Sidebar, Main Content, Cart Panel */
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--k-bg);
+}
+
+/* Sidebar Navigation */
+.pos-sidebar {
+    background-color: var(--k-surface);
+    padding: 20px 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+}
+
+.pos-logo {
+    padding: 0 20px 20px;
+    text-align: center;
+}
+
+.pos-logo img {
+    max-width: 150px; /* Adjust as needed */
+}
+
+.pos-nav-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.pos-nav-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    margin: 5px 0;
+    color: var(--k-text-main);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-left: 5px solid transparent;
+}
+
+.pos-nav-menu li a i {
+    font-size: 20px;
+    margin-right: 15px;
+    color: #999;
+}
+
+.pos-nav-menu li a.active {
+    background-color: #F8F9FD; /* Light gray for active background */
+    border-left-color: var(--k-primary);
+    color: var(--k-text-main);
+    font-weight: 700;
+}
+
+.pos-nav-menu li a.active i {
+    color: var(--k-primary);
+}
+
+/* Main Content Area */
+.pos-main-content {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.pos-catalog-header {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.pos-search-bar {
+    flex-grow: 1;
+    position: relative;
+}
+
+.pos-search-bar input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--k-border);
+    border-radius: var(--k-radius-md);
+    background-color: var(--k-surface);
+    font-size: 14px;
+}
+
+.pos-search-bar i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+.pos-category-dropdown,
+.pos-brand-filter {
+    padding: 10px 15px;
+    border: 1px solid var(--k-border);
+    border-radius: var(--k-radius-md);
+    background-color: var(--k-surface);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.pos-category-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 10px; /* For scrollbar if needed */
+    -webkit-overflow-scrolling: touch;
+}
+
+.pos-category-tabs::-webkit-scrollbar {
+    height: 5px;
+}
+
+.pos-category-tabs::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+
+.pos-tab-item {
+    flex-shrink: 0;
+    padding: 8px 15px;
+    border-radius: 20px;
+    background-color: var(--k-surface);
+    border: 1px solid var(--k-border);
+    color: #666;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pos-tab-item.active,
+.pos-tab-item:hover {
+    background-color: var(--k-primary);
+    color: white;
+    border-color: var(--k-primary);
+}
+
+.pos-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* 4-5 columns */
+    gap: 20px;
+}
+
+/* Cart Panel */
+.pos-cart-panel {
+    background-color: var(--k-surface);
+    padding: 20px;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.02);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.pos-cart-header {
+    margin-bottom: 20px;
+}
+
+.pos-cart-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+    color: var(--k-text-main);
+}
+
+.pos-cart-dining-options {
+    display: flex;
+    gap: 10px;
+}
+
+.pos-cart-dining-options select {
+    flex-grow: 1;
+    padding: 8px 10px;
+    border: 1px solid var(--k-border);
+    border-radius: var(--k-radius-md);
+    background-color: var(--k-bg);
+    font-size: 13px;
+}
+
+.pos-cart-list {
+    flex-grow: 1;
+    margin-bottom: 20px;
+}
+
+.pos-cart-bill {
+    border-top: 1px solid var(--k-border);
+    padding-top: 20px;
+}
+
+.pos-bill-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.pos-bill-row.total {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--k-text-main);
+    margin-top: 15px;
+}
+
+.pos-bill-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pos-bill-actions .btn-action {
+    padding: 12px;
+    border-radius: var(--k-radius-md);
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.pos-bill-actions .btn-kot-print {
+    background-color: #333;
+    color: white;
+}
+
+.pos-bill-actions .btn-draft {
+    background-color: transparent;
+    border: 1px solid #ccc;
+    color: #666;
+}
+
+.pos-bill-actions .btn-bill-payment {
+    grid-column: span 2;
+    background-color: var(--k-primary);
+    color: white;
+}
+
+.pos-bill-actions .btn-bill-print {
+    grid-column: span 2;
+    background-color: #4CAF50; /* Green for print */
+    color: white;
+}
