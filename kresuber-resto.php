@@ -2,15 +2,15 @@
 /*
 Plugin Name: Kresuber Resto
 Plugin URI: https://resto.kresuber.co.id/
-Description: v1.1.6 FIXES: Fixed Product Loading (AJAX), App Routing, and Dashboard UI. Implements Strict Module Loading.
-Version: 1.1.6
+Description: v1.1.7 FEATS: Shortcodes for POS/App, Demo Product Importer, Responsive Product Grid, Product Detail Page, Dynamic Bottom Navbar, WooCommerce Account Integration. FIXES: Improved Product Import.
+Version: 1.1.7
 Author: Kresuber Digital
 Author URI: https://resto.kresuber.co.id/
 Text Domain: kresuber-resto
 */
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'KRESUBER_VERSION', '1.1.6' );
+define( 'KRESUBER_VERSION', '1.1.7' );
 define( 'KRESUBER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'KRESUBER_URL', plugin_dir_url( __FILE__ ) );
 define( 'KRESUBER_NONCE', 'kresuber_pos_secure' );

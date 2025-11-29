@@ -21,11 +21,11 @@ class Kresuber_POS_Core {
 
     public function rewrites() {
         add_rewrite_rule('^pos-terminal/?$', 'index.php?kresuber_endpoint=pos', 'top');
+        add_rewrite_rule('^app/product/([^/]+)/?$', 'index.php?kresuber_endpoint=app_product&product_id=$matches[1]', 'top');
         add_rewrite_rule('^app/favorites/?$', 'index.php?kresuber_endpoint=app_favorites', 'top');
-        add_rewrite_rule('^app/orders/?$', 'index.php?kresuber_endpoint=app_orders', 'top');
-        add_rewrite_rule('^app/account/?$', 'index.php?kresuber_endpoint=app_account', 'top');
         add_rewrite_rule('^app/?$', 'index.php?kresuber_endpoint=app', 'top');
         add_rewrite_tag('%kresuber_endpoint%', '([^&]+)');
+        add_rewrite_tag('%product_id%', '([^&]+)');
     }
 
     public function load_template() {
@@ -41,8 +41,7 @@ class Kresuber_POS_Core {
             'pos' => 'app-shell.php',
             'app' => 'user-app-shell.php',
             'app_favorites' => 'favorites-shell.php',
-            'app_orders' => 'orders-shell.php',
-            'app_account' => 'account-shell.php',
+            'app_product' => 'single-product-shell.php',
         ];
 
         if (isset($templates[$endpoint])) {
