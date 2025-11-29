@@ -602,3 +602,52 @@
 .table-actions i.delete:hover {
     background: #ff4444; /* Merah untuk hapus */
 }
+
+/* ------------------------------------------------------------------ */
+/* CHECKOUT PAGE OVERRIDES (Specific for form-pay.php) */
+/* ------------------------------------------------------------------ */
+
+/* Pastikan radio button di payment method tersembunyi tapi tetap bisa diakses */
+.woocommerce-checkout-payment ul.payment_methods li input[type=radio] {
+    opacity: 0;
+    position: absolute;
+    width: 0;
+}
+
+/* Label Pembayaran jadi Kartu */
+.woocommerce-checkout-payment ul.payment_methods li label {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Menambahkan Lingkaran Radio Kustom di Kanan */
+.woocommerce-checkout-payment ul.payment_methods li label::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    display: block;
+    margin-left: auto; /* Dorong ke kanan */
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+/* State Checked */
+.woocommerce-checkout-payment ul.payment_methods li input[type=radio]:checked + label::after {
+    border-color: #FF6B00;
+    background-color: #FF6B00;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='12' height='12' fill='white'%3E%3Cpath d='M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Gambar Ikon Pembayaran (Jika disediakan plugin payment gateway) */
+.woocommerce-checkout-payment ul.payment_methods li label img {
+    max-height: 24px;
+    margin-right: 15px;
+    order: -1; /* Pindah ke kiri teks */
+}
