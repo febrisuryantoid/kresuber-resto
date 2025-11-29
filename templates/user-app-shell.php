@@ -1,3 +1,9 @@
+<?php 
+/**
+ * User App Shell - Kresuber Resto
+ * URL: /app/
+ */
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,40 +12,73 @@
     <title>Menu Restoran</title>
     <?php wp_head(); ?>
     <style>
-        /* Mobile Specific Overrides */
-        body { background: #fff; }
-        .app-header { padding: 20px; position: sticky; top: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); z-index: 50; }
-        .app-user { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-        .app-avatar { width: 40px; height: 40px; background: #FF6B00; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .app-greeting h4 { margin: 0; font-size: 16px; color: #1a1a1a; }
-        .app-greeting span { font-size: 12px; color: #888; }
+        /* Force Full App UI & Hide WP Admin Bar if visible */
+        html { margin-top: 0 !important; }
+        body { background-color: #fff; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        #wpadminbar { display: none !important; }
         
-        .k-grid-products { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 20px 100px 20px; }
-        .k-card-prod { border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .k-card-img { height: 120px; }
+        /* Header App Style */
+        .app-header-sticky {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .app-logo-text { font-size: 20px; font-weight: 800; color: #1a1a1a; margin: 0; }
         
-        .app-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 12px 20px; display: flex; justify-content: space-around; border-radius: 24px 24px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 100; }
-        .nav-icon { font-size: 24px; color: #ccc; }
-        .nav-icon.active { color: #FF6B00; }
+        /* Search Bar Style */
+        .app-search-wrap { padding: 10px 20px; background: #fff; }
+        .app-search-input {
+            width: 100%; padding: 12px 15px 12px 40px;
+            border-radius: 12px; border: 1px solid #eee;
+            background: #F8F9FD url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23999" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>') no-repeat 12px center;
+            font-size: 14px; outline: none;
+        }
+        .app-search-input:focus { border-color: #FF6B00; background-color: #fff; }
+
+        /* Cart Badge */
+        .k-btn-cart { position: relative; text-decoration: none; color: #1a1a1a; font-size: 24px; }
+        .k-badge {
+            position: absolute; top: -5px; right: -5px;
+            background: #FF6B00; color: white;
+            font-size: 10px; font-weight: bold;
+            height: 16px; min-width: 16px; padding: 0 4px;
+            border-radius: 10px;
+            display: none; /* Hidden by default via JS */
+            align-items: center; justify-content: center;
+        }
     </style>
 </head>
-<body>
+<body class="kresuber-user-app">
     
     <div id="k-app-container">
-        <div class="k-header">
-            <h1 class="k-title">Selamat Datang!</h1>
-            <div class="k-header-actions">
-                <a href="<?php echo wc_get_cart_url(); ?>" class="k-btn-cart">
-                    <i class="ri-shopping-cart-2-line"></i>
-                    <span id="k-cart-qty" class="k-badge">0</span>
-                </a>
+        <div class="app-header-sticky">
+            <h1 class="app-logo-text">Selamat Datang!</h1>
+            <a href="<?php echo wc_get_cart_url(); ?>" class="k-btn-cart">
+                <i class="ri-shopping-cart-2-line"></i>
+                <span id="k-cart-qty" class="k-badge">0</span>
+            </a>
+        </div>
+
+        <div class="app-search-wrap">
+            <input type="text" id="k-search" placeholder="Cari menu favoritmu..." class="app-search-input">
+        </div>
+
+        <div style="padding: 0 20px; margin-bottom: 10px;">
+            <select class="pos-category-dropdown" style="width:100%; padding:10px; border-radius:8px; border:1px solid #eee; background:#fff;">
+                <option value="all">Semua Kategori</option>
+            </select>
+        </div>
+
+        <div id="k-grid" class="k-product-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                <i class="ri-loader-4-line ri-spin" style="font-size: 24px; color: #FF6B00;"></i>
             </div>
         </div>
-        <div class="k-content">
-            <input type="text" id="k-search" placeholder="Cari menu..." class="k-search-input">
-            <div id="k-grid" class="k-product-grid"></div>
-        </div>
-        <?php include KRESUBER_PATH . 'templates/bottom-navbar.php'; // Include bottom navbar ?>
+
+        <?php include KRESUBER_PATH . 'templates/bottom-navbar.php'; ?>
     </div>
 
     <?php wp_footer(); ?>

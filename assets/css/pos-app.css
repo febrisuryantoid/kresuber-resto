@@ -1,19 +1,114 @@
-/* Kresuber POS - Compiled */
+/* Kresuber POS - Compiled Styles */
 @import './modules/_layout.css';
 @import './modules/_components.css';
 
 :root { --k-primary: #FF6B00; --k-bg: #F8F9FD; --k-surface: #FFF; --k-text-main: #1A1A1A; --k-border: #F0F0F0; --k-radius-md: 12px; }
 * { box-sizing: border-box; }
 
-/* Product Card */
-.k-card-prod { background: var(--k-surface); border-radius: 16px; padding: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; position: relative; }
-.k-card-prod:active { transform: scale(0.97); }
-.k-card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; margin-bottom: 8px; background: #eee; }
-.k-card-title { font-size: 14px; font-weight: 700; color: var(--k-text-main); margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.k-card-price { font-size: 16px; font-weight: 800; color: var(--k-primary); }
-.k-btn-add-float { position: absolute; bottom: 12px; right: 12px; width: 32px; height: 32px; background: var(--k-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(255,107,0,0.3); }
+/* ------------------------------------------------------------------ */
+/* 1. RESPONSIVE GRID CONFIGURATION (HP: 2, Tablet: 4, Desktop: 6) */
+/* ------------------------------------------------------------------ */
+.k-product-grid {
+    display: grid;
+    gap: 16px;
+    padding: 10px 20px 100px 20px; /* Padding bottom untuk ruang navbar */
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr); /* Default Mobile: 2 Kolom */
+}
 
-/* Bottom Navbar Styles */
+/* Tablet (min-width: 768px): 4 Kolom */
+@media (min-width: 768px) {
+    .k-product-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Desktop (min-width: 1200px): 6 Kolom */
+@media (min-width: 1200px) {
+    .k-product-grid {
+        grid-template-columns: repeat(6, 1fr);
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. PRODUCT CARD STYLING */
+/* ------------------------------------------------------------------ */
+.k-card-prod { 
+    background: var(--k-surface); 
+    border-radius: 16px; 
+    padding: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+    cursor: pointer; 
+    transition: transform 0.2s, box-shadow 0.2s; 
+    position: relative; 
+    display: flex; 
+    flex-direction: column; 
+    border: 1px solid transparent;
+}
+
+.k-card-prod:hover {
+    border-color: var(--k-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.k-card-prod:active { transform: scale(0.97); }
+
+.k-card-img { 
+    width: 100%; 
+    aspect-ratio: 1/1; 
+    object-fit: cover; 
+    border-radius: 12px; 
+    margin-bottom: 10px; 
+    background: #f0f0f0; 
+}
+
+.k-card-title { 
+    font-size: 14px; 
+    font-weight: 700; 
+    color: var(--k-text-main); 
+    margin-bottom: 4px; 
+    display: -webkit-box; 
+    -webkit-line-clamp: 2; 
+    line-clamp: 2; 
+    -webkit-box-orient: vertical; 
+    overflow: hidden; 
+    min-height: 36px; /* Tinggi baris judul konsisten */
+}
+
+.k-card-price { 
+    font-size: 15px; 
+    font-weight: 800; 
+    color: var(--k-primary); 
+    margin-top: auto; 
+}
+
+.k-btn-add-float { 
+    position: absolute; 
+    bottom: 12px; 
+    right: 12px; 
+    width: 32px; 
+    height: 32px; 
+    background: var(--k-primary); 
+    color: white; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    box-shadow: 0 4px 10px rgba(255,107,0,0.3); 
+    border: none;
+    z-index: 2; 
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. NAVIGATION & LAYOUT STYLES */
+/* ------------------------------------------------------------------ */
+
+/* Bottom Navbar */
 .k-bottom-navbar {
     position: fixed;
     bottom: 0;
@@ -39,14 +134,8 @@
     transition: color 0.2s;
 }
 
-.k-nav-item i {
-    font-size: 24px;
-    margin-bottom: 4px;
-}
-
-.k-nav-item.active {
-    color: var(--k-primary);
-}
+.k-nav-item i { font-size: 24px; margin-bottom: 4px; }
+.k-nav-item.active { color: var(--k-primary); }
 
 /* WooCommerce My Account Custom Styles */
 .woocommerce-account .woocommerce-MyAccount-navigation,
@@ -58,15 +147,8 @@
     margin-bottom: 20px;
 }
 
-.woocommerce-account .woocommerce-MyAccount-navigation ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.woocommerce-account .woocommerce-MyAccount-navigation li {
-    margin-bottom: 10px;
-}
+.woocommerce-account .woocommerce-MyAccount-navigation ul { list-style: none; margin: 0; padding: 0; }
+.woocommerce-account .woocommerce-MyAccount-navigation li { margin-bottom: 10px; }
 
 .woocommerce-account .woocommerce-MyAccount-navigation li a {
     text-decoration: none;
@@ -106,16 +188,8 @@
     padding: 20px 0;
 }
 
-.k-orders-header {
-    padding: 0 20px 20px;
-}
-
-.k-orders-header .k-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--k-text-main);
-    margin: 0;
-}
+.k-orders-header { padding: 0 20px 20px; }
+.k-orders-header .k-title { font-size: 24px; font-weight: 800; color: var(--k-text-main); margin: 0; }
 
 .k-order-filter-tabs {
     display: flex;
@@ -145,9 +219,7 @@
     box-shadow: 0 4px 8px rgba(255,107,0,0.2);
 }
 
-.k-order-list {
-    padding: 0 20px;
-}
+.k-order-list { padding: 0 20px; }
 
 .k-order-card {
     background: var(--k-surface);
@@ -157,11 +229,7 @@
     box-shadow: 0 4px 20px rgba(0,0,0,0.05);
 }
 
-.k-order-card-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
+.k-order-card-header { display: flex; align-items: center; margin-bottom: 15px; }
 
 .k-order-thumbnail {
     width: 60px;
@@ -171,27 +239,10 @@
     margin-right: 15px;
 }
 
-.k-order-info {
-    flex-grow: 1;
-}
-
-.k-order-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--k-text-main);
-    margin-bottom: 4px;
-}
-
-.k-order-id {
-    font-size: 12px;
-    color: #888;
-}
-
-.k-order-total {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--k-text-main);
-}
+.k-order-info { flex-grow: 1; }
+.k-order-title { font-size: 14px; font-weight: 700; color: var(--k-text-main); margin-bottom: 4px; }
+.k-order-id { font-size: 12px; color: #888; }
+.k-order-total { font-size: 16px; font-weight: 800; color: var(--k-text-main); }
 
 .k-order-card-footer {
     display: flex;
@@ -252,30 +303,11 @@
 }
 
 .k-detail-header .k-btn-back,
-.k-detail-header .k-icon-cart {
-    font-size: 24px;
-    color: var(--k-text-main);
-}
+.k-detail-header .k-icon-cart { font-size: 24px; color: var(--k-text-main); }
+.k-detail-header .k-title { font-size: 20px; font-weight: 700; margin: 0; color: var(--k-text-main); }
 
-.k-detail-header .k-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0;
-    color: var(--k-text-main);
-}
-
-.k-map-section {
-    position: relative;
-    height: 200px;
-    margin-bottom: 20px;
-}
-
-.k-map-placeholder {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 0 0 20px 20px;
-}
+.k-map-section { position: relative; height: 200px; margin-bottom: 20px; }
+.k-map-placeholder { width: 100%; height: 100%; object-fit: cover; border-radius: 0 0 20px 20px; }
 
 .k-live-tracking-badge {
     position: absolute;
@@ -307,29 +339,12 @@
     margin-right: 15px;
 }
 
-.k-driver-details {
-    flex-grow: 1;
-}
-
-.k-driver-name {
-    font-size: 15px;
-    font-weight: 700;
-    margin: 0;
-}
-
-.k-driver-rating {
-    font-size: 12px;
-    color: #888;
-    margin: 0;
-}
-
+.k-driver-details { flex-grow: 1; }
+.k-driver-name { font-size: 15px; font-weight: 700; margin: 0; }
+.k-driver-rating { font-size: 12px; color: #888; margin: 0; }
 .k-driver-rating i { color: gold; }
 
-.k-driver-actions {
-    display: flex;
-    gap: 10px;
-}
-
+.k-driver-actions { display: flex; gap: 10px; }
 .k-driver-action-btn {
     width: 36px;
     height: 36px;
@@ -354,12 +369,12 @@
 .k-order-timeline::before {
     content: '';
     position: absolute;
-    left: 35px; /* Adjust to align with icons */
+    left: 35px;
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, var(--k-primary) 0%, #ccc 100%); /* Gradient or solid dashed */
-    background-size: 100% 10px; /* Dashed effect */
+    background: linear-gradient(to bottom, var(--k-primary) 0%, #ccc 100%);
+    background-size: 100% 10px;
     background-repeat: repeat-y;
     z-index: 1;
 }
@@ -375,7 +390,7 @@
 .k-timeline-icon {
     width: 30px;
     height: 30px;
-    min-width: 30px; /* Prevent shrinking */
+    min-width: 30px;
     border-radius: 50%;
     background: #ccc;
     color: white;
@@ -387,30 +402,17 @@
     z-index: 3;
 }
 
-.k-timeline-item.completed .k-timeline-icon {
-    background-color: var(--k-primary);
-}
+.k-timeline-item.completed .k-timeline-icon { background-color: var(--k-primary); }
 
-.k-timeline-content {
-    flex-grow: 1;
-}
-
-.k-timeline-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--k-text-main);
-}
-
-.k-timeline-date {
-    font-size: 12px;
-    color: #888;
-}
+.k-timeline-content { flex-grow: 1; }
+.k-timeline-title { font-size: 14px; font-weight: 700; color: var(--k-text-main); }
+.k-timeline-date { font-size: 12px; color: #888; }
 
 .k-order-footer-actions {
     position: sticky;
     bottom: 0;
     width: 100%;
-    max-width: 480px; /* Match wrap max-width */
+    max-width: 480px;
     margin: auto;
     padding: 15px 20px;
     background: var(--k-surface);
@@ -432,9 +434,7 @@
     justify-content: center;
 }
 
-.k-btn-full-width {
-    width: 100%;
-}
+.k-btn-full-width { width: 100%; }
 
 /* My Account Dashboard Styles */
 .k-account-dashboard {
@@ -462,19 +462,8 @@
     border: 3px solid var(--k-primary);
 }
 
-.k-user-name {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--k-text-main);
-    margin: 0 0 5px 0;
-}
-
-.k-user-email {
-    font-size: 15px;
-    color: #888;
-    margin: 0 0 10px 0;
-}
-
+.k-user-name { font-size: 28px; font-weight: 800; color: var(--k-text-main); margin: 0 0 5px 0; }
+.k-user-email { font-size: 15px; color: #888; margin: 0 0 10px 0; }
 .k-member-level {
     font-size: 13px;
     color: #666;
@@ -491,9 +480,7 @@
 }
 
 @media (min-width: 576px) {
-    .k-account-menu-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .k-account-menu-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .k-account-menu-item {
@@ -510,29 +497,15 @@
 
 .k-account-menu-item:hover { transform: translateY(-3px); }
 
-.k-icon-menu {
-    font-size: 22px;
-    color: var(--k-primary);
-    margin-right: 15px;
-}
-
-.k-menu-label {
-    flex-grow: 1;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.k-arrow-icon {
-    font-size: 20px;
-    color: #ccc;
-}
+.k-icon-menu { font-size: 22px; color: var(--k-primary); margin-right: 15px; }
+.k-menu-label { flex-grow: 1; font-size: 16px; font-weight: 600; }
+.k-arrow-icon { font-size: 20px; color: #ccc; }
 
 /* ------------------------------------------------------------------ */
-/* NEW: Table Management Styles (CRUD & Sync Features) */
+/* 4. TABLE MANAGEMENT STYLES (CRUD & Sync) */
 /* ------------------------------------------------------------------ */
-
 .text-sm {
-    font-size: 13px !important; /* Memperkecil ukuran font nama meja */
+    font-size: 13px !important;
     font-weight: 600;
     margin-top: 8px;
     color: #444;
@@ -541,7 +514,7 @@
 .table-card {
     position: relative;
     background: white;
-    padding: 15px; /* Padding lebih kecil */
+    padding: 15px;
     border-radius: 12px;
     text-align: center;
     border: 1px solid #eee;
@@ -577,13 +550,11 @@
     right: 5px;
     display: flex;
     gap: 5px;
-    opacity: 0; /* Sembunyi jika tidak dihover */
+    opacity: 0;
     transition: opacity 0.2s;
 }
 
-.table-card:hover .table-actions {
-    opacity: 1; /* Muncul saat dihover */
-}
+.table-card:hover .table-actions { opacity: 1; }
 
 .table-actions i {
     font-size: 16px;
@@ -594,17 +565,11 @@
     cursor: pointer;
 }
 
-.table-actions i:hover {
-    background: var(--k-primary);
-    color: white;
-}
-
-.table-actions i.delete:hover {
-    background: #ff4444; /* Merah untuk hapus */
-}
+.table-actions i:hover { background: var(--k-primary); color: white; }
+.table-actions i.delete:hover { background: #ff4444; }
 
 /* ------------------------------------------------------------------ */
-/* CHECKOUT PAGE OVERRIDES (Specific for form-pay.php) */
+/* 5. CHECKOUT PAGE OVERRIDES (Specific for form-pay.php) */
 /* ------------------------------------------------------------------ */
 
 /* Pastikan radio button di payment method tersembunyi tapi tetap bisa diakses */
@@ -631,7 +596,7 @@
     border: 2px solid #ddd;
     border-radius: 50%;
     display: block;
-    margin-left: auto; /* Dorong ke kanan */
+    margin-left: auto;
     flex-shrink: 0;
     transition: all 0.2s;
 }
@@ -645,9 +610,9 @@
     background-position: center;
 }
 
-/* Gambar Ikon Pembayaran (Jika disediakan plugin payment gateway) */
+/* Gambar Ikon Pembayaran */
 .woocommerce-checkout-payment ul.payment_methods li label img {
     max-height: 24px;
     margin-right: 15px;
-    order: -1; /* Pindah ke kiri teks */
+    order: -1;
 }
