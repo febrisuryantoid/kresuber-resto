@@ -10,6 +10,11 @@ class Kresuber_POS_Core {
         add_shortcode('kresuber_pos_terminal', [$this, 'render_pos_terminal']);
         add_shortcode('kresuber_pos_app', [$this, 'render_pos_app']);
 
+        // WooCommerce Template Override
+        add_filter('woocommerce_template_path', function() {
+            return 'templates/woocommerce/';
+        }, 1, 0);
+
         new Kresuber_POS_Admin();
         new Kresuber_POS_Api();
     }
