@@ -59,4 +59,25 @@ export class UIManager {
         if(this.taxElement) this.taxElement.innerText = this.formatMoney(state.tax);
         if(this.totalElement) this.totalElement.innerText = this.formatMoney(state.total);
     }
+
+    renderCategories(categories) {
+        const categoryTabsContainer = document.querySelector('.pos-category-tabs');
+        const categoryDropdown = document.querySelector('.pos-category-dropdown');
+
+        if (categoryTabsContainer) {
+            let tabsHtml = '<div class="pos-tab-item active" data-slug="all">All</div>';
+            categories.forEach(cat => {
+                tabsHtml += `<div class="pos-tab-item" data-slug="${cat.slug}">${cat.name}</div>`;
+            });
+            categoryTabsContainer.innerHTML = tabsHtml;
+        }
+
+        if (categoryDropdown) {
+            let dropdownHtml = '<option value="all">Semua Kategori</option>';
+            categories.forEach(cat => {
+                dropdownHtml += `<option value="${cat.slug}">${cat.name}</option>`;
+            });
+            categoryDropdown.innerHTML = dropdownHtml;
+        }
+    }
 }
