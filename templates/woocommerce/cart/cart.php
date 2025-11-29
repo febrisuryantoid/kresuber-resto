@@ -1,6 +1,6 @@
 <?php
 /**
- * Custom Mobile Cart Template
+ * Custom Mobile Cart Template (UI Match)
  * Location: templates/woocommerce/cart/cart.php
  */
 defined( 'ABSPATH' ) || exit;
@@ -13,83 +13,166 @@ defined( 'ABSPATH' ) || exit;
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Keranjang Saya</title>
     <?php wp_head(); ?>
-    <style>
-        /* CSS Inline Darurat agar tidak berantakan jika CSS utama gagal load */
-        body { background: #F8F9FD !important; margin: 0; padding-bottom: 120px; }
-        .k-cart-wrap { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff; position: relative; }
-        .k-cart-header { padding: 15px 20px; display: flex; align-items: center; background: #fff; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #f0f0f0; }
-        .k-cart-title { flex-grow: 1; text-align: center; font-size: 18px; font-weight: 700; margin: 0; color: #1a1a1a; }
-        
-        .k-empty-state { text-align: center; padding: 60px 20px; }
-        .k-empty-icon { font-size: 64px; color: #ddd; margin-bottom: 15px; }
-        .k-btn-shop { display: inline-block; padding: 12px 25px; background: #FF6B00; color: white; text-decoration: none; border-radius: 12px; font-weight: 600; margin-top: 20px; }
-        
-        .k-cart-list { padding: 20px; }
-        .k-cart-item { display: flex; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed #eee; }
-        .k-cart-img { width: 70px; height: 70px; border-radius: 10px; object-fit: cover; margin-right: 15px; background: #eee; }
-        .k-cart-info h4 { margin: 0 0 5px 0; font-size: 14px; font-weight: 700; color: #333; }
-        .k-cart-price { color: #FF6B00; font-weight: 700; font-size: 14px; }
-        .k-remove-btn { color: #ff4444; font-size: 20px; margin-left: auto; text-decoration: none; }
-        
-        .k-cart-summary { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 100; box-sizing: border-box; }
-        @media(min-width: 768px) { .k-cart-summary { max-width: 480px; left: 50%; transform: translateX(-50%); } }
-        
-        .k-sum-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
-        .k-sum-total { font-weight: 800; font-size: 18px; margin: 10px 0 15px; border-top: 1px solid #eee; padding-top: 10px; }
-        .k-btn-checkout { display: block; width: 100%; padding: 15px; background: #FF6B00; color: white; text-align: center; border-radius: 12px; text-decoration: none; font-weight: 700; }
-    </style>
 </head>
 <body class="kresuber-app-mode">
 
 <div class="k-cart-wrap">
-    <div class="k-cart-header">
-        <a href="<?php echo home_url('/app'); ?>" style="color:#333; font-size:24px; text-decoration:none;"><i class="ri-arrow-left-s-line"></i></a>
-        <h1 class="k-cart-title">Keranjang</h1>
-        <div style="width:24px;"></div>
+    <div class="k-header">
+        <a href="<?php echo home_url('/app'); ?>" class="k-btn-back"><i class="ri-arrow-left-s-line"></i></a>
+        <h1 class="k-page-title">My Cart</h1>
+        <i class="ri-shopping-bag-3-line k-icon-bag"></i>
     </div>
 
+    <div style="padding: 0 20px;"><?php wc_print_notices(); ?></div>
+
     <?php if ( WC()->cart->is_empty() ) : ?>
-        <div class="k-empty-state">
-            <i class="ri-shopping-basket-2-line k-empty-icon"></i>
-            <h3>Keranjang Kosong</h3>
-            <p style="color:#888;">Belum ada menu yang dipilih.</p>
-            <a href="<?php echo home_url('/app'); ?>" class="k-btn-shop">Pesan Sekarang</a>
+        <div class="k-empty-state" style="text-align:center; padding: 80px 20px;">
+            <i class="ri-shopping-cart-2-line" style="font-size:64px; color:#e0e0e0; margin-bottom:20px; display:inline-block;"></i>
+            <h3 style="color:#333; margin:0 0 10px;">Your Cart is Empty</h3>
+            <p style="color:#888; margin-bottom:30px;">Looks like you haven't added anything to your cart yet.</p>
+            <a href="<?php echo home_url('/app'); ?>" class="k-btn-confirm" style="width:200px; margin:0 auto;">Shop Now</a>
         </div>
     <?php else : ?>
-        <div class="k-cart-list">
-            <?php foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) : 
-                $_product = $cart_item['data'];
-                if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 ) :
-                    $image = wp_get_attachment_image_url($_product->get_image_id(), 'thumbnail') ?: 'https://placehold.co/100x100';
-                    ?>
-                    <div class="k-cart-item">
-                        <img src="<?php echo esc_url($image); ?>" class="k-cart-img">
-                        <div class="k-cart-info">
-                            <h4><?php echo $_product->get_name(); ?></h4>
-                            <div class="k-cart-price">
-                                <?php echo WC()->cart->get_product_price( $_product ); ?> x <?php echo $cart_item['quantity']; ?>
+        
+        <form class="woocommerce-cart-form" action="<?php echo esc_url( wc_get_cart_url() ); ?>" method="post">
+            <div class="k-cart-list" style="padding: 20px;">
+                <?php foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) : 
+                    $_product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+                    $product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
+                    
+                    if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_cart_item_visible', true, $cart_item, $cart_item_key ) ) :
+                        $image = wp_get_attachment_image_url($_product->get_image_id(), 'thumbnail') ?: 'https://placehold.co/100x100';
+                        ?>
+                        
+                        <div class="k-cart-card">
+                            <div class="k-c-img-wrap">
+                                <img src="<?php echo esc_url($image); ?>" class="k-c-img">
+                            </div>
+                            
+                            <div class="k-c-content">
+                                <div class="k-c-top">
+                                    <h4 class="k-c-title"><?php echo $_product->get_name(); ?></h4>
+                                    <?php echo apply_filters( 'woocommerce_cart_item_remove_link', sprintf(
+                                        '<a href="%s" class="k-c-remove" aria-label="%s" data-product_id="%s" data-product_sku="%s"><i class="ri-close-line"></i></a>',
+                                        esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
+                                        esc_html__( 'Remove this item', 'woocommerce' ),
+                                        esc_attr( $product_id ),
+                                        esc_attr( $_product->get_sku() )
+                                    ), $cart_item_key ); ?>
+                                </div>
+                                
+                                <div class="k-c-meta">
+                                    <?php echo wc_get_formatted_cart_item_data( $cart_item ); // Variation data ?>
+                                </div>
+
+                                <div class="k-c-bottom">
+                                    <div class="k-c-price">
+                                        <?php echo apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $_product ), $cart_item, $cart_item_key ); ?>
+                                    </div>
+                                    
+                                    <div class="k-c-qty">
+                                        <button type="button" class="k-qty-btn minus" onclick="changeCartQty(this, -1)">-</button>
+                                        <?php
+                                            if ( $_product->is_sold_individually() ) {
+                                                $product_quantity = sprintf( '1 <input type="hidden" name="cart[%s][qty]" value="1" />', $cart_item_key );
+                                            } else {
+                                                $product_quantity = woocommerce_quantity_input(
+                                                    array(
+                                                        'input_name'   => "cart[{$cart_item_key}][qty]",
+                                                        'input_value'  => $cart_item['quantity'],
+                                                        'max_value'    => $_product->get_max_purchase_quantity(),
+                                                        'min_value'    => '0',
+                                                        'product_name' => $_product->get_name(),
+                                                        'classes'      => 'k-qty-input', // Custom class
+                                                    ),
+                                                    $_product,
+                                                    false
+                                                );
+                                            }
+                                            echo $product_quantity;
+                                        ?>
+                                        <button type="button" class="k-qty-btn plus" onclick="changeCartQty(this, 1)">+</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <a href="<?php echo esc_url( wc_get_cart_remove_url( $cart_item_key ) ); ?>" class="k-remove-btn"><i class="ri-delete-bin-line"></i></a>
-                    </div>
-                <?php endif; 
-            endforeach; ?>
-        </div>
+                    <?php endif; 
+                endforeach; ?>
+            </div>
 
-        <div style="height: 150px;"></div> <div class="k-cart-summary">
+            <div class="k-promo-section">
+                <?php if ( wc_coupons_enabled() ) : ?>
+                    <div class="k-promo-wrap">
+                        <div class="k-promo-icon"><i class="ri-coupon-3-fill"></i></div>
+                        <input type="text" name="coupon_code" class="k-promo-input" id="coupon_code" value="" placeholder="Apply a promo code" /> 
+                        <button type="submit" class="k-btn-apply" name="apply_coupon" value="Apply">Apply</button>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <button type="submit" class="button" name="update_cart" value="<?php esc_attr_e( 'Update cart', 'woocommerce' ); ?>" style="display:none;" id="k-update-cart-btn">Update</button>
+            <?php wp_nonce_field( 'woocommerce-cart', 'woocommerce-cart-nonce' ); ?>
+        </form>
+
+        <div style="height: 200px;"></div> 
+
+        <div class="k-cart-summary">
             <div class="k-sum-row">
                 <span>Subtotal</span>
-                <span><?php wc_cart_totals_subtotal_html(); ?></span>
+                <span class="val"><?php wc_cart_totals_subtotal_html(); ?></span>
             </div>
-            <div class="k-sum-row k-sum-total">
-                <span>Total</span>
-                <span><?php wc_cart_totals_order_total_html(); ?></span>
+            
+            <?php foreach ( WC()->cart->get_coupons() as $code => $coupon ) : ?>
+                <div class="k-sum-row coupon">
+                    <span>Coupon: <?php echo esc_html( $code ); ?></span>
+                    <span class="val">-<?php wc_cart_totals_coupon_html( $coupon ); ?></span>
+                </div>
+            <?php endforeach; ?>
+
+            <div class="k-sum-row">
+                <span>Delivery</span>
+                <span class="val">
+                    <?php if (WC()->cart->needs_shipping() && WC()->cart->show_shipping()) : ?>
+                        <?php wc_cart_totals_shipping_html(); ?>
+                    <?php else: ?>
+                        Free
+                    <?php endif; ?>
+                </span>
             </div>
-            <a href="<?php echo wc_get_checkout_url(); ?>" class="k-btn-checkout">Checkout</a>
+
+            <div class="k-sum-divider"></div>
+
+            <div class="k-sum-row total">
+                <span>Total Cost</span>
+                <span class="val"><?php wc_cart_totals_order_total_html(); ?></span>
+            </div>
+            
+            <a href="<?php echo wc_get_checkout_url(); ?>" class="k-btn-confirm">Checkout Now</a>
         </div>
+
     <?php endif; ?>
 </div>
 
 <?php wp_footer(); ?>
+
+<script>
+    // JS Sederhana untuk handle Qty Change langsung update cart
+    function changeCartQty(btn, delta) {
+        const wrapper = btn.closest('.k-c-qty');
+        const input = wrapper.querySelector('input.qty');
+        let val = parseInt(input.value) || 0;
+        
+        val += delta;
+        if(val < 0) val = 0; // 0 usually removes item
+        
+        input.value = val;
+        
+        // Trigger Update Cart (Native WooCommerce)
+        const updateBtn = document.getElementById('k-update-cart-btn');
+        updateBtn.removeAttribute('disabled');
+        updateBtn.click();
+    }
+</script>
+
 </body>
 </html>
