@@ -6,6 +6,10 @@ class Kresuber_POS_Core {
         add_action('wp_enqueue_scripts', [$this, 'assets']);
         add_filter('script_loader_tag', [$this, 'add_type_attribute'], 10, 3); // FIX JS MODULE
         
+        // Shortcodes
+        add_shortcode('kresuber_pos_terminal', [$this, 'render_pos_terminal']);
+        add_shortcode('kresuber_pos_app', [$this, 'render_pos_app']);
+
         new Kresuber_POS_Admin();
         new Kresuber_POS_Api();
     }
@@ -17,6 +21,11 @@ class Kresuber_POS_Core {
     }
 
     public function load_template() {
+        global $post;
+        if (is_object($post) && (has_shortcode($post->post_content, 'kresuber_pos_terminal') || has_shortcode($post->post_content, 'kresuber_pos_app'))) {
+            return; // Biarkan shortcode yang menangani
+        }
+
         $endpoint = get_query_var('kresuber_endpoint');
         if (!$endpoint) return;
 
@@ -33,7 +42,11 @@ class Kresuber_POS_Core {
     }
 
     public function assets() {
-        if (!get_query_var('kresuber_endpoint')) return;
+        global $post;
+        $is_wc_page = function_exists('is_cart') && (is_cart() || is_checkout());
+        $has_shortcode = is_object($post) && (has_shortcode($post->post_content, 'kresuber_pos_terminal') || has_shortcode($post->post_content, 'kresuber_pos_app'));
+
+        if (!get_query_var('kresuber_endpoint') && !$is_wc_page && !$has_shortcode) return;
 
         // CSS
         wp_enqueue_style('k-fonts', 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -55,5 +68,19 @@ class Kresuber_POS_Core {
     public function add_type_attribute($tag, $handle, $src) {
         if ('k-pos-app' !== $handle) return $tag;
         return '<script type="module" src="' . esc_url($src) . '"></script>';
+    }
+
+    // Shortcode Renderers
+    public function render_pos_terminal() {
+        if (!current_user_can('edit_products')) return '<p>You do not have permission to view this content.</p>';
+        ob_start();
+        include KRESUBER_PATH . 'templates/app-shell.php';
+        return ob_get_clean();
+    }
+
+    public function render_pos_app() {
+        ob_start();
+        include KRESUBER_PATH . 'templates/user-app-shell.php';
+        return ob_get_clean();
     }
 }

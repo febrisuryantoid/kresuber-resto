@@ -4,6 +4,8 @@ class Kresuber_POS_Api {
         add_action('wp_ajax_kresuber_get_init_data', [$this, 'get_init']);
         add_action('wp_ajax_kresuber_get_products', [$this, 'get_products']);
         add_action('wp_ajax_nopriv_kresuber_get_products', [$this, 'get_products']); // Allow App User to see products
+        add_action('wp_ajax_kresuber_sync_cart', [$this, 'sync_cart']);
+        add_action('wp_ajax_nopriv_kresuber_sync_cart', [$this, 'sync_cart']);
     }
 
     public function get_init() {
@@ -45,5 +47,30 @@ class Kresuber_POS_Api {
         }
         wp_reset_postdata();
         wp_send_json_success($data);
+    }
+
+    public function sync_cart() {
+        check_ajax_referer(KRESUBER_NONCE, 'nonce');
+
+        if (!isset($_POST['items']) || !is_array($_POST['items'])) {
+            wp_send_json_error('Invalid cart data.', 400);
+        }
+
+        if (!function_exists('WC')) {
+            wp_send_json_error('WooCommerce is not active.', 500);
+            return;
+        }
+
+        $items = json_decode(stripslashes($_POST['items']), true);
+        
+        WC()->cart->empty_cart();
+
+        foreach ($items as $item) {
+            $product_id = intval($item['id']);
+            $quantity = intval($item['qty']);
+            WC()->cart->add_to_cart($product_id, $quantity);
+        }
+
+        wp_send_json_success(['message' => 'Cart synced successfully.']);
     }
 }
