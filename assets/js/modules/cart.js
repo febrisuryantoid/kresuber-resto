@@ -4,16 +4,14 @@ export class CartManager {
         this.taxRate = 10; 
     }
     
-    // Method Init (Optional)
     init(taxRate) { this.taxRate = taxRate || 10; }
     
-    // ADD: Mendukung penambahan dengan Qty spesifik (Default 1)
+    // ADD: Tambah Item & Sync
     add(product, quantity = 1) {
         const existing = this.items.find(i => i.id === product.id);
         if (existing) {
             existing.qty += quantity;
         } else {
-            // Pastikan struktur data aman
             this.items.push({ 
                 id: product.id, 
                 name: product.name || 'Produk',
@@ -23,14 +21,13 @@ export class CartManager {
             });
         }
         
-        // PENTING: Sync ke WooCommerce setiap kali cart berubah
-        // Agar saat user pindah ke halaman /cart/, isinya sama
+        // PENTING: Kirim data ke server agar halaman /cart/ sinkron
         this.syncWithWooCommerce(); 
         
         return this.getTotals();
     }
     
-    // UPDATE: Ubah quantity (+/-)
+    // UPDATE QTY
     updateQty(id, delta) {
         const item = this.items.find(i => i.id === id);
         if (!item) return this.getTotals();
@@ -40,55 +37,53 @@ export class CartManager {
             this.items = this.items.filter(i => i.id !== id);
         }
         
-        this.syncWithWooCommerce();
+        this.syncWithWooCommerce(); // Sync lagi
         return this.getTotals();
     }
     
-    // REMOVE: Hapus item
+    // REMOVE ITEM
     remove(id) {
         this.items = this.items.filter(i => i.id !== id);
-        this.syncWithWooCommerce();
+        this.syncWithWooCommerce(); // Sync lagi
         return this.getTotals();
     }
     
-    // CLEAR: Kosongkan keranjang
+    // CLEAR CART
     clear() {
         this.items = [];
-        this.syncWithWooCommerce();
+        this.syncWithWooCommerce(); // Sync lagi (kosongkan server)
         return this.getTotals();
     }
     
-    // CALC: Hitung total
     getTotals() {
         const subtotal = this.items.reduce((acc, item) => acc + (item.price * item.qty), 0);
         const tax = subtotal * (this.taxRate / 100);
-        return { 
-            items: this.items, 
-            subtotal: subtotal, 
-            tax: tax, 
-            total: subtotal + tax 
-        };
+        return { items: this.items, subtotal, tax, total: subtotal + tax };
     }
 
-    // SYNC: Kirim data cart ke server (PHP Session)
+    // FUNGSI SINKRONISASI KE SERVER
     syncWithWooCommerce() {
         if (typeof KRESUBER === 'undefined') return;
 
-        // Gunakan Promise agar bisa di-await jika perlu
-        return jQuery.post(KRESUBER.ajax_url, {
+        // Kita gunakan jQuery post sederhana tanpa blocking UI
+        jQuery.post(KRESUBER.ajax_url, {
             action: 'kresuber_sync_cart',
             nonce: KRESUBER.nonce,
             items: JSON.stringify(this.items)
+        }).done(function(res) {
+            if(res.success) {
+                console.log("Cart synced:", res.data.count);
+            }
         });
     }
 
-    // CHECKOUT: Proses order dan dapatkan Payment URL
+    // CHECKOUT PROSES
     async checkout(tableNo, diningType) {
         if (this.items.length === 0) throw new Error("Keranjang kosong!");
 
         return new Promise((resolve, reject) => {
             jQuery.post(KRESUBER.ajax_url, {
-                action: 'kresuber_process_order', // Pastikan nama action sama dengan di PHP
+                action: 'kresuber_process_order',
                 nonce: KRESUBER.nonce,
                 items: JSON.stringify(this.items),
                 table_no: tableNo,
@@ -96,10 +91,10 @@ export class CartManager {
             })
             .done(response => {
                 if (response.success) {
-                    this.clear(); // Bersihkan cart lokal setelah sukses
-                    resolve(response.data); // Return data (termasuk payment_url)
+                    this.clear(); // Bersihkan cart lokal
+                    resolve(response.data);
                 } else {
-                    reject(response.data.message || 'Terjadi kesalahan server.');
+                    reject(response.data.message || 'Error server.');
                 }
             })
             .fail(() => {

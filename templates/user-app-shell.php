@@ -3,6 +3,7 @@
  * User App Shell - Kresuber Resto
  * URL: /app/
  */
+defined( 'ABSPATH' ) || exit;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -12,12 +13,11 @@
     <title>Menu Restoran</title>
     <?php wp_head(); ?>
     <style>
-        /* Force Full App UI & Hide WP Admin Bar if visible */
         html { margin-top: 0 !important; }
         body { background-color: #fff; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         #wpadminbar { display: none !important; }
         
-        /* Header App Style */
+        /* Header Sticky */
         .app-header-sticky {
             position: sticky; top: 0; z-index: 50;
             background: rgba(255, 255, 255, 0.95);
@@ -28,7 +28,19 @@
         }
         .app-logo-text { font-size: 20px; font-weight: 800; color: #1a1a1a; margin: 0; }
         
-        /* Search Bar Style */
+        /* Cart Icon */
+        .k-btn-cart { position: relative; text-decoration: none; color: #1a1a1a; font-size: 24px; }
+        .k-badge {
+            position: absolute; top: -5px; right: -5px;
+            background: #FF6B00; color: white;
+            font-size: 10px; font-weight: bold;
+            height: 16px; min-width: 16px; padding: 0 4px;
+            border-radius: 10px;
+            display: none;
+            align-items: center; justify-content: center;
+        }
+
+        /* Search & Filter */
         .app-search-wrap { padding: 10px 20px; background: #fff; }
         .app-search-input {
             width: 100%; padding: 12px 15px 12px 40px;
@@ -37,18 +49,6 @@
             font-size: 14px; outline: none;
         }
         .app-search-input:focus { border-color: #FF6B00; background-color: #fff; }
-
-        /* Cart Badge */
-        .k-btn-cart { position: relative; text-decoration: none; color: #1a1a1a; font-size: 24px; }
-        .k-badge {
-            position: absolute; top: -5px; right: -5px;
-            background: #FF6B00; color: white;
-            font-size: 10px; font-weight: bold;
-            height: 16px; min-width: 16px; padding: 0 4px;
-            border-radius: 10px;
-            display: none; /* Hidden by default via JS */
-            align-items: center; justify-content: center;
-        }
     </style>
 </head>
 <body class="kresuber-user-app">
@@ -56,14 +56,14 @@
     <div id="k-app-container">
         <div class="app-header-sticky">
             <h1 class="app-logo-text">Selamat Datang!</h1>
-            <a href="<?php echo wc_get_cart_url(); ?>" class="k-btn-cart">
+            <a href="<?php echo home_url('/app/cart'); ?>" class="k-btn-cart">
                 <i class="ri-shopping-cart-2-line"></i>
                 <span id="k-cart-qty" class="k-badge">0</span>
             </a>
         </div>
 
         <div class="app-search-wrap">
-            <input type="text" id="k-search" placeholder="Cari menu favoritmu..." class="app-search-input">
+            <input type="text" id="k-search" placeholder="Cari menu..." class="app-search-input">
         </div>
 
         <div style="padding: 0 20px; margin-bottom: 10px;">
