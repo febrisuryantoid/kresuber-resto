@@ -2,7 +2,7 @@
 /*
 Plugin Name: Kresuber Resto
 Plugin URI: https://resto.kresuber.co.id/
-Description: v1.1.7 FEATS: Shortcodes for POS/App, Demo Product Importer, Responsive Product Grid, Product Detail Page, Dynamic Bottom Navbar, WooCommerce Account Integration. FIXES: Improved Product Import.
+Description: Shortcodes for POS/App, Demo Product Importer, Responsive Product Grid, Product Detail Page, Dynamic Bottom Navbar, WooCommerce Account Integration. FIXES: Improved Product Import.
 Version: 1.1.7
 Author: Kresuber Digital
 Author URI: https://resto.kresuber.co.id/
