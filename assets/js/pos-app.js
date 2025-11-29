@@ -6,7 +6,7 @@ jQuery(document).ready(function($) {
     const UI = new UIManager();
     let productsCache = [];
 
-    // Make global for onclick events in HTML strings
+    // Global Handlers
     window.triggerAdd = (id) => {
         const p = productsCache.find(x => x.id == id);
         if(p) UI.renderCart(Cart.add(p));
@@ -28,119 +28,107 @@ jQuery(document).ready(function($) {
         try {
             const productRes = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_products', nonce: KRESUBER.nonce });
             if (productRes.success) {
-                console.log("Products Loaded:", productRes.data.length);
                 productsCache = productRes.data;
                 UI.renderProducts(productsCache);
-
-                // Initial render of cart, after products are loaded
                 UI.renderCart(Cart.getTotals());
-
             } else {
-                console.error("Failed to load products", productRes.data);
-                $('#k-grid').html('<p style="color:red; padding:20px;">Gagal memuat produk.</p>');
+                $('#k-grid').html('<div style="grid-column:1/-1;text-align:center;padding:40px;">Gagal memuat produk.</div>');
             }
         } catch (error) {
-            console.error("Error fetching products:", error);
-            $('#k-grid').html('<p style="color:red; padding:20px;">Terjadi kesalahan saat memuat produk.</p>');
+            console.error(error);
+            $('#k-grid').html('<div style="grid-column:1/-1;text-align:center;padding:40px;">Error koneksi server.</div>');
         }
 
         // Fetch Categories
         try {
             const categoryRes = await $.post(KRESUBER.ajax_url, { action: 'kresuber_get_product_categories' });
             if (categoryRes.success) {
-                console.log("Categories Loaded:", categoryRes.data.length);
                 UI.renderCategories(categoryRes.data);
-                filterAndRenderProducts(); // Apply initial filter (e.g., 'All') after categories are loaded
-            } else {
-                console.error("Failed to load categories", categoryRes.data);
             }
         } catch (error) {
-            console.error("Error fetching categories:", error);
+            console.error("Error categories:", error);
         }
     }
 
     init();
-    $('#k-search').on('input', function() {
-        const term = $(this).val().toLowerCase();
-        const filtered = productsCache.filter(p => p.name.toLowerCase().includes(term));
-        UI.renderProducts(filtered);
-    });
 
-    // Category Tabs Handler
+    // --- Search & Filter Logic ---
+    $('#k-search').on('input', function() { filterProducts(); });
     $('.pos-category-tabs').on('click', '.pos-tab-item', function() {
         $('.pos-category-tabs .pos-tab-item').removeClass('active');
         $(this).addClass('active');
-        filterAndRenderProducts();
+        filterProducts();
     });
-
-    // Category Dropdown Handler
     $('.pos-category-dropdown').on('change', function() {
-        $('.pos-category-tabs .pos-tab-item').removeClass('active'); // Deselect tabs when dropdown used
-        filterAndRenderProducts();
+        $('.pos-category-tabs .pos-tab-item').removeClass('active');
+        filterProducts();
     });
 
-    // Brand Filter Handler (Basic)
-    $('.pos-brand-filter').on('change', function() {
-        filterAndRenderProducts();
-    });
+    function filterProducts() {
+        const term = $('#k-search').val().toLowerCase();
+        const activeTab = $('.pos-category-tabs .pos-tab-item.active').data('slug');
+        const dropdownVal = $('.pos-category-dropdown').val();
+        
+        // Prioritas filter: Tab > Dropdown (jika tab tidak active)
+        let catFilter = 'all';
+        if (activeTab) catFilter = activeTab;
+        else if (dropdownVal) catFilter = dropdownVal;
 
-    function filterAndRenderProducts() {
-        const searchTerm = $('#k-search').val().toLowerCase();
-        const activeCategoryTab = $('.pos-category-tabs .pos-tab-item.active').data('slug');
-        const selectedCategoryDropdown = $('.pos-category-dropdown').val();
-        const selectedBrand = $('.pos-brand-filter').val(); // Assuming a 'brand' property exists
-
-        let filtered = productsCache.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(searchTerm);
+        const filtered = productsCache.filter(p => {
+            const matchesSearch = p.name.toLowerCase().includes(term);
+            // Cek kategori (handle string HTML atau raw slug)
+            let pCats = p.category; 
+            if(typeof pCats === 'string' && pCats.includes('<')) {
+                pCats = $(`<div>${p.category}</div>`).text().toLowerCase();
+            } else if (typeof pCats === 'string') {
+                pCats = pCats.toLowerCase();
+            }
             
-            const productCategories = typeof p.category === 'string' 
-                                ? $(`<div>${p.category}</div>`).text().toLowerCase() 
-                                : '';
-            const matchesCategoryTab = activeCategoryTab === 'all' || productCategories.includes(activeCategoryTab);
-            const matchesCategoryDropdown = selectedCategoryDropdown === 'all' || productCategories.includes(selectedCategoryDropdown);
-            
-            const matchesBrand = selectedBrand === 'all' || (p.brand && p.brand.toLowerCase() === selectedBrand); // Keep for future, or remove if not used
-
-            return matchesSearch && matchesCategoryTab && matchesCategoryDropdown && matchesBrand;
+            const matchesCat = catFilter === 'all' || (pCats && pCats.includes(catFilter));
+            return matchesSearch && matchesCat;
         });
-
         UI.renderProducts(filtered);
     }
 
-    // Initial render of cart, after products are loaded
-    // This ensures cart can display correctly even if initialized early.
-    UI.renderCart(Cart.getTotals());
+    // --- BUTTON ACTIONS (FUNGSIONALITAS DIAKTIFKAN) ---
 
-    // Dining Type & Table Selection
-    $('#k-select-table').on('change', function() {
-        console.log('Meja dipilih:', $(this).val());
-        // Further logic for table selection (e.g., saving to order)
+    // 1. Bill & Payment (CHECKOUT)
+    $('.btn-bill-payment').on('click', async function() {
+        const $btn = $(this);
+        const tableNo = $('#k-select-table').val();
+        const diningType = $('#k-select-dining-type').val();
+
+        if (!tableNo) {
+            alert('Mohon pilih Nomor Meja terlebih dahulu!');
+            return;
+        }
+
+        if(confirm('Proses pembayaran dan buat pesanan?')) {
+            $btn.prop('disabled', true).text('Memproses...');
+            
+            try {
+                const result = await Cart.checkout(tableNo, diningType);
+                alert('SUKSES! \nOrder ID: #' + result.order_id + '\nTotal: ' + result.total);
+                
+                // Reset UI
+                UI.renderCart(Cart.getTotals()); 
+                $('#k-select-table').val(''); // Reset meja
+            } catch (error) {
+                alert('GAGAL: ' + error);
+            } finally {
+                $btn.prop('disabled', false).text('Bill & Payment');
+            }
+        }
     });
 
-    $('#k-select-dining-type').on('change', function() {
-        console.log('Tipe santap dipilih:', $(this).val());
-        // Further logic for dining type (e.g., adjusting tax/service fee)
+    // 2. Print Functions
+    $('.btn-kot-print, .btn-bill-print').on('click', function() {
+        // Simple browser print for now
+        window.print();
     });
 
-    // Cart Action Buttons (Placeholders)
-    $('.btn-kot-print').on('click', function() {
-        console.log('KOT & Print clicked!');
-        alert('Fungsionalitas KOT & Print akan datang!');
-    });
-
+    // 3. Draft (Simpan sementara di localStorage - Sederhana)
     $('.btn-draft').on('click', function() {
-        console.log('Draft clicked!');
-        alert('Fungsionalitas Draft akan datang!');
-    });
-
-    $('.btn-bill-payment').on('click', function() {
-        console.log('Bill & Payment clicked!');
-        alert('Fungsionalitas Bill & Payment akan datang!');
-        // Trigger WooCommerce checkout process here
-    });
-
-    $('.btn-bill-print').on('click', function() {
-        console.log('Bill & Print clicked!');
-        alert('Fungsionalitas Bill & Print akan datang!');
+        alert('Fitur Draft disimpan (Simulasi).');
     });
 });
