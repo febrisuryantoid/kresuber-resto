@@ -1,12 +1,12 @@
 <?php
 /**
- * Custom Payment Page - Full App Responsive
+ * Custom Payment Page - Full Width & Single Checklist
  * Location: templates/woocommerce/checkout/form-pay.php
  */
 
 defined( 'ABSPATH' ) || exit;
 
-// Setup Data Order
+// Setup Data Order Manual (Karena bypass theme)
 global $wp;
 $order_id = isset( $wp->query_vars['order-pay'] ) ? absint( $wp->query_vars['order-pay'] ) : 0;
 $order = wc_get_order( $order_id );
@@ -42,31 +42,32 @@ $table_no = $order->get_meta('_kresuber_table_no') ?: '-';
     <div class="k-header">
         <a href="<?php echo home_url('/app'); ?>" class="k-btn-back"><i class="ri-arrow-left-s-line"></i></a>
         <h1 class="k-page-title">Checkout</h1>
-        <div style="width:24px;"></div> </div>
+        <div style="width:24px;"></div>
+    </div>
 
-    <div style="padding:0 20px; margin-top:10px;">
+    <div style="padding:0 20px; margin-top:15px;">
         <?php wc_print_notices(); ?>
     </div>
 
     <form id="order_review" method="post">
 
-        <div style="padding: 20px 20px 0;">
-            <h3 style="font-size:14px; font-weight:700; margin-bottom:10px;">Dining Location</h3>
+        <div style="padding: 10px 20px;">
+            <h3 style="font-size:14px; font-weight:700; margin-bottom:10px; color:#555;">Dining Location</h3>
             <div style="display:flex; align-items:center; background:#FFF8F0; padding:15px; border-radius:12px; border:1px solid #FFEDD5;">
                 <div style="width:40px; height:40px; background:#FF6B00; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:20px; margin-right:15px;">
                     <i class="ri-map-pin-user-fill"></i>
                 </div>
                 <div>
-                    <div style="font-weight:700; font-size:14px;">Meja: <?php echo esc_html($table_no); ?></div>
-                    <div style="font-size:12px; color:#666;">Order #<?php echo $order_id; ?> • <?php echo date_i18n('d M Y, H:i'); ?></div>
+                    <div style="font-weight:700; font-size:15px; color:#333;">Meja: <?php echo esc_html($table_no); ?></div>
+                    <div style="font-size:12px; color:#888; margin-top:2px;">Order #<?php echo $order_id; ?></div>
                 </div>
-                <i class="ri-checkbox-circle-fill" style="margin-left:auto; color:#4CAF50; font-size:20px;"></i>
+                <i class="ri-checkbox-circle-fill" style="margin-left:auto; color:#4CAF50; font-size:22px;"></i>
             </div>
         </div>
 
         <div style="padding: 20px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <h3 style="font-size:14px; font-weight:700; margin:0;">Payment Method</h3>
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                <h3 style="font-size:14px; font-weight:700; margin:0; color:#555;">Payment Method</h3>
                 <span style="font-size:12px; color:#FF6B00; font-weight:600;">Choose One</span>
             </div>
 
@@ -99,7 +100,7 @@ $table_no = $order->get_meta('_kresuber_table_no') ?: '-';
                                 <?php
                             }
                         } else {
-                            echo '<li>Tidak ada metode pembayaran.</li>';
+                            echo '<li>Tidak ada metode pembayaran tersedia.</li>';
                         }
                         ?>
                     </ul>
@@ -115,6 +116,8 @@ $table_no = $order->get_meta('_kresuber_table_no') ?: '-';
                 </div>
             </div>
         </div>
+
+        <div style="height:100px;"></div>
 
         <div class="k-bottom-bar">
             <button type="submit" class="k-btn-confirm" onclick="document.getElementById('place_order').click(); return false;">
