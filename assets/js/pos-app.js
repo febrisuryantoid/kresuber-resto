@@ -16,6 +16,10 @@ jQuery(document).ready(function($) {
         UI.renderCart(Cart.updateQty(id, delta));
     };
 
+    window.triggerRemove = (id) => {
+        UI.renderCart(Cart.remove(id));
+    };
+
     // Load Data
     function init() {
         console.log("POS Initializing...");
