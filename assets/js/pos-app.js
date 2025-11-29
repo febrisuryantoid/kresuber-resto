@@ -90,11 +90,13 @@ jQuery(document).ready(function($) {
         let filtered = productsCache.filter(p => {
             const matchesSearch = p.name.toLowerCase().includes(searchTerm);
             
-            const productCategories = typeof p.category === 'string' ? $(p.category).text().toLowerCase() : ''; // Extract text from HTML string
+            const productCategories = typeof p.category === 'string' 
+                                ? $(`<div>${p.category}</div>`).text().toLowerCase() 
+                                : '';
             const matchesCategoryTab = activeCategoryTab === 'all' || productCategories.includes(activeCategoryTab);
             const matchesCategoryDropdown = selectedCategoryDropdown === 'all' || productCategories.includes(selectedCategoryDropdown);
             
-            const matchesBrand = selectedBrand === 'all' || (p.brand && p.brand.toLowerCase() === selectedBrand);
+            const matchesBrand = selectedBrand === 'all' || (p.brand && p.brand.toLowerCase() === selectedBrand); // Keep for future, or remove if not used
 
             return matchesSearch && matchesCategoryTab && matchesCategoryDropdown && matchesBrand;
         });
@@ -102,7 +104,8 @@ jQuery(document).ready(function($) {
         UI.renderProducts(filtered);
     }
 
-    // Initial render of cart
+    // Initial render of cart, after products are loaded
+    // This ensures cart can display correctly even if initialized early.
     UI.renderCart(Cart.getTotals());
 
     // Dining Type & Table Selection
