@@ -13,10 +13,18 @@ class Kresuber_POS_Core {
         new Kresuber_POS_Api();
     }
 
+    // --- HELPER BAHASA (INDONESIA DEFAULT) ---
+    public static function get_lang() {
+        return isset($_COOKIE['k_app_lang']) ? $_COOKIE['k_app_lang'] : 'id';
+    }
+
+    // Fungsi statis untuk dipanggil di template: Kresuber_POS_Core::_k('Indo', 'Eng')
+    public static function _k($id_text, $en_text) {
+        return self::get_lang() === 'en' ? $en_text : $id_text;
+    }
+
     public function rewrites() {
-        // Endpoint Khusus Cart
         add_rewrite_rule('^app/cart/?$', 'index.php?kresuber_endpoint=app_cart', 'top');
-        
         add_rewrite_rule('^pos-terminal/?$', 'index.php?kresuber_endpoint=pos', 'top');
         add_rewrite_rule('^app/product/([^/]+)/?$', 'index.php?kresuber_endpoint=app_product&product_id=$matches[1]', 'top');
         add_rewrite_rule('^app/favorites/?$', 'index.php?kresuber_endpoint=app_favorites', 'top');
@@ -35,34 +43,22 @@ class Kresuber_POS_Core {
                 'app'           => 'user-app-shell.php',
                 'app_product'   => 'single-product-shell.php',
                 'app_favorites' => 'favorites-shell.php',
-                'app_cart'      => 'woocommerce/cart/cart.php' // Custom Cart Template
+                'app_cart'      => 'woocommerce/cart/cart.php'
             ];
-
             if (isset($files[$endpoint])) {
-                if ($endpoint === 'pos' && !current_user_can('edit_products')) {
-                    auth_redirect();
-                }
+                if ($endpoint === 'pos' && !current_user_can('edit_products')) auth_redirect();
                 return KRESUBER_PATH . 'templates/' . $files[$endpoint];
             }
         }
 
         if (function_exists('is_woocommerce')) {
-            // Redirect User ke Custom Cart jika akses /cart/ biasa
-            if (is_cart()) {
-                wp_safe_redirect(home_url('/app/cart'));
-                exit;
-            }
+            if (is_cart()) { wp_safe_redirect(home_url('/app/cart')); exit; }
             if (is_checkout()) {
-                if(is_wc_endpoint_url('order-pay')) {
-                    return KRESUBER_PATH . 'templates/woocommerce/checkout/form-pay.php';
-                }
+                if(is_wc_endpoint_url('order-pay')) return KRESUBER_PATH . 'templates/woocommerce/checkout/form-pay.php';
                 return KRESUBER_PATH . 'templates/woocommerce/checkout/form-checkout.php';
             }
-            if (is_account_page()) {
-                return KRESUBER_PATH . 'templates/account-shell.php';
-            }
+            if (is_account_page()) return KRESUBER_PATH . 'templates/account-shell.php';
         }
-
         return $template;
     }
 
@@ -81,8 +77,7 @@ class Kresuber_POS_Core {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce(KRESUBER_NONCE),
             'site_url' => site_url(),
-            'cart_url' => home_url('/app/cart'),
-            'checkout_url' => wc_get_checkout_url()
+            'current_lang' => self::get_lang() // Kirim status bahasa ke JS
         ]);
     }
 
