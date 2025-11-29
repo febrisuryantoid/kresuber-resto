@@ -2,7 +2,6 @@
 class Kresuber_POS_Core {
     public function __construct() {
         add_action('init', [$this, 'rewrites']);
-        // Ganti template_redirect dengan template_include (Lebih kuat untuk override tema)
         add_filter('template_include', [$this, 'force_app_templates'], 99);
         add_action('wp_enqueue_scripts', [$this, 'assets']);
         add_filter('script_loader_tag', [$this, 'add_type_attribute'], 10, 3);
@@ -25,11 +24,10 @@ class Kresuber_POS_Core {
         add_rewrite_tag('%product_id%', '([^&]+)');
     }
 
-    // FUNGSI UTAMA: Mencegat Tema WordPress
     public function force_app_templates($template) {
-        // 1. Cek Halaman Custom Plugin (/app, /pos-terminal)
         $endpoint = get_query_var('kresuber_endpoint');
         
+        // 1. Custom Endpoints
         if ($endpoint) {
             $files = [
                 'pos' => 'app-shell.php',
@@ -42,45 +40,39 @@ class Kresuber_POS_Core {
                 if ($endpoint === 'pos' && !current_user_can('edit_products')) {
                     auth_redirect();
                 }
-                // Return file path langsung (Bypass Theme)
                 return KRESUBER_PATH . 'templates/' . $files[$endpoint];
             }
         }
 
-        // 2. Cek Halaman WooCommerce Standar (Cart, Checkout, Account)
-        // Kita paksa halaman ini menggunakan template "Shell" dari plugin kita
+        // 2. WooCommerce Overrides
         if (function_exists('is_woocommerce')) {
             if (is_cart()) {
                 return KRESUBER_PATH . 'templates/woocommerce/cart/cart.php';
             }
             if (is_checkout()) {
-                // Bedakan antara Form Checkout input data dan Order Pay (Pembayaran)
                 if(is_wc_endpoint_url('order-pay')) {
                     return KRESUBER_PATH . 'templates/woocommerce/checkout/form-pay.php';
                 }
                 return KRESUBER_PATH . 'templates/woocommerce/checkout/form-checkout.php';
             }
+            // MENGAMBIL ALIH HALAMAN AKUN TOTAL
             if (is_account_page()) {
-                // Gunakan wrapper khusus untuk akun agar full width
                 return KRESUBER_PATH . 'templates/account-shell.php';
             }
         }
 
-        return $template; // Kembalikan ke tema jika bukan halaman App
+        return $template;
     }
 
     public function assets() {
-        // Load assets HANYA di halaman App/WooCommerce yang relevan
         $is_target_page = get_query_var('kresuber_endpoint') || (function_exists('is_woocommerce') && (is_cart() || is_checkout() || is_account_page()));
 
         if (!$is_target_page) return;
 
-        // CSS Global
         wp_enqueue_style('k-fonts', 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         wp_enqueue_style('k-icons', 'https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css');
         wp_enqueue_style('k-pos-style', KRESUBER_URL . 'assets/css/pos-app.css', [], time()); 
         
-        // JS Global
         wp_enqueue_script('k-pos-app', KRESUBER_URL . 'assets/js/pos-app.js', ['jquery'], time(), true);
         
         wp_localize_script('k-pos-app', 'KRESUBER', [
@@ -97,7 +89,6 @@ class Kresuber_POS_Core {
         return '<script type="module" src="' . esc_url($src) . '"></script>';
     }
 
-    // Shortcode Fallback (Jika user ingin manual insert)
-    public function render_pos_terminal() { return 'Silakan akses /pos-terminal'; }
-    public function render_pos_app() { return 'Silakan akses /app'; }
+    public function render_pos_terminal() { return 'Akses via /pos-terminal'; }
+    public function render_pos_app() { return 'Akses via /app'; }
 }

@@ -4,286 +4,66 @@
 
 :root { --k-primary: #FF6B00; --k-bg: #F8F9FD; --k-surface: #FFF; --k-text-main: #1A1A1A; --k-border: #F0F0F0; --k-radius-md: 12px; }
 
-/* RESET GLOBAL AGAR FULL APP */
-html, body {
-    margin: 0; padding: 0;
-    background-color: var(--k-bg) !important;
-    font-family: 'Plus Jakarta Sans', sans-serif, system-ui !important;
-    -webkit-font-smoothing: antialiased;
-}
-
+/* RESET GLOBAL */
+html, body { margin: 0; padding: 0; background-color: var(--k-bg) !important; font-family: 'Plus Jakarta Sans', sans-serif !important; -webkit-font-smoothing: antialiased; }
 #wpadminbar { display: none !important; }
-header.site-header, footer.site-footer, .elementor-location-header, .elementor-location-footer { 
-    display: none !important; 
+header, footer { display: none !important; } /* Sembunyikan header tema */
+
+/* Layout Containers (Mobile First Centered) */
+#k-app-container, .k-checkout-layout, .k-account-shell-wrap, .k-cart-wrap {
+    width: 100%; max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; position: relative;
+    box-shadow: 0 0 20px rgba(0,0,0,0.03);
 }
 
-/* LAYOUT CONTAINERS */
-#k-app-container {
-    width: 100%;
-    min-height: 100vh;
-    background: #fff;
-    margin: 0 auto;
-}
-
-.k-checkout-layout, 
-.k-account-dashboard,
-.k-cart-summary,
-.k-footer-sticky .k-footer-inner,
-.k-bottom-action,
-.k-account-shell-wrap, 
-.k-cart-wrap {
-    max-width: 480px; 
-    margin: 0 auto;
-    left: 0; right: 0;
-}
-
-.k-account-shell-wrap { background: #fff; min-height: 100vh; box-shadow: 0 0 30px rgba(0,0,0,0.03); }
-
-* { box-sizing: border-box; }
-
-/* ------------------------------------------------------------------ */
-/* 1. RESPONSIVE GRID CONFIGURATION */
-/* ------------------------------------------------------------------ */
+/* 1. PRODUCT GRID */
 .k-product-grid {
-    display: grid;
-    gap: 16px;
-    padding: 10px 20px 100px 20px;
-    width: 100%;
-    grid-template-columns: repeat(2, 1fr); /* Mobile Default */
+    display: grid; gap: 16px; padding: 10px 20px 100px 20px;
+    grid-template-columns: repeat(2, 1fr);
 }
+@media (min-width: 768px) { .k-product-grid { grid-template-columns: repeat(4, 1fr); max-width: 100%; } }
 
-@media (min-width: 768px) {
-    .k-product-grid { grid-template-columns: repeat(4, 1fr); }
-}
+/* 2. PRODUCT CARD */
+.k-card-prod { background: #fff; border-radius: 16px; padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; border: 1px solid #f5f5f5; transition: 0.2s; }
+.k-card-prod:active { transform: scale(0.98); }
+.k-card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; margin-bottom: 8px; background: #eee; }
+.k-card-title { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 36px; }
+.k-card-price { font-size: 15px; font-weight: 800; color: var(--k-primary); }
+.k-btn-add-float { position: absolute; bottom: 10px; right: 10px; width: 32px; height: 32px; background: var(--k-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; border: none; cursor: pointer; }
+.k-btn-fav { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; background: rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; z-index: 5; font-size: 16px; }
+.k-btn-fav.active { color: #FF4081; }
 
-@media (min-width: 1200px) {
-    .k-product-grid {
-        grid-template-columns: repeat(6, 1fr);
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-}
+/* 3. ACCOUNT & PROFILE STYLES */
+.k-profile-header { background: linear-gradient(135deg, #FF6B00 0%, #FF8F00 100%); padding: 40px 20px 30px; text-align: center; color: white; border-radius: 0 0 24px 24px; margin-bottom: 20px; }
+.k-profile-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.5); object-fit: cover; margin-bottom: 10px; background: #fff; }
+.k-profile-name { font-size: 20px; font-weight: 700; margin: 0; }
+.k-profile-email { font-size: 13px; opacity: 0.9; margin: 0; }
 
-/* ------------------------------------------------------------------ */
-/* 2. PRODUCT CARD STYLING */
-/* ------------------------------------------------------------------ */
-.k-card-prod { 
-    background: var(--k-surface); 
-    border-radius: 16px; 
-    padding: 12px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-    cursor: pointer; 
-    transition: transform 0.2s, box-shadow 0.2s; 
-    position: relative; 
-    display: flex; 
-    flex-direction: column; 
-    border: 1px solid transparent;
-}
+.k-menu-grid { display: grid; grid-template-columns: 1fr; gap: 10px; padding: 0 20px; }
+.k-menu-item { display: flex; align-items: center; background: #fff; padding: 16px; border-radius: 16px; border: 1px solid #f0f0f0; text-decoration: none; color: #333; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+.k-menu-item:active { background: #f9f9f9; transform: scale(0.99); }
+.k-menu-icon { width: 40px; height: 40px; background: #FFF0E6; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--k-primary); font-size: 20px; margin-right: 15px; }
+.k-menu-label { flex-grow: 1; font-weight: 600; font-size: 15px; }
 
-.k-card-prod:hover {
-    border-color: var(--k-primary);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
+/* 4. ORDER LIST STYLES (Cards NOT Table) */
+.k-order-list-wrap { padding: 20px 20px 100px; }
+.k-order-card-new { background: #fff; border: 1px solid #eee; border-radius: 16px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+.k-ord-head { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
+.k-ord-id { font-weight: 700; color: #333; }
+.k-ord-date { font-size: 12px; color: #888; }
+.k-ord-body { display: flex; align-items: center; margin-bottom: 12px; }
+.k-ord-thumb { width: 50px; height: 50px; border-radius: 8px; background: #eee; margin-right: 12px; object-fit: cover; }
+.k-ord-info h4 { margin: 0 0 4px 0; font-size: 14px; color: #333; }
+.k-ord-total { font-weight: 700; color: var(--k-primary); }
+.k-ord-footer { display: flex; justify-content: space-between; align-items: center; }
+.k-ord-status { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.status-completed { background: #E8F5E9; color: #2E7D32; }
+.status-processing { background: #FFF3E0; color: #EF6C00; }
+.status-pending { background: #E3F2FD; color: #1565C0; }
+.status-cancelled { background: #FFEBEE; color: #C62828; }
+.k-btn-detail { background: #f5f5f5; color: #333; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; }
 
-.k-card-prod:active { transform: scale(0.97); }
-
-.k-card-img { 
-    width: 100%; 
-    aspect-ratio: 1/1; 
-    object-fit: cover; 
-    border-radius: 12px; 
-    margin-bottom: 10px; 
-    background: #f0f0f0; 
-}
-
-.k-card-title { 
-    font-size: 14px; 
-    font-weight: 700; 
-    color: var(--k-text-main); 
-    margin-bottom: 4px; 
-    display: -webkit-box; 
-    -webkit-line-clamp: 2; 
-    line-clamp: 2; 
-    -webkit-box-orient: vertical; 
-    overflow: hidden; 
-    min-height: 36px;
-}
-
-.k-card-price { 
-    font-size: 15px; 
-    font-weight: 800; 
-    color: var(--k-primary); 
-    margin-top: auto; 
-}
-
-/* Tombol Add (+) */
-.k-btn-add-float { 
-    position: absolute; 
-    bottom: 12px; 
-    right: 12px; 
-    width: 32px; 
-    height: 32px; 
-    background: var(--k-primary); 
-    color: white; 
-    border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    box-shadow: 0 4px 10px rgba(255,107,0,0.3); 
-    border: none;
-    z-index: 2; 
-    font-size: 18px;
-    cursor: pointer;
-}
-
-/* Tombol Favorite (Heart) */
-.k-btn-fav {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(4px);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ccc;
-    font-size: 18px;
-    z-index: 5;
-    transition: all 0.2s;
-    border: 1px solid #eee;
-}
-
-.k-btn-fav:hover { transform: scale(1.1); }
-.k-btn-fav.active { color: #FF4081; border-color: #FFCDD2; background: #FFF0F5; }
-.k-btn-fav i { pointer-events: none; }
-
-/* ------------------------------------------------------------------ */
-/* 3. NAVIGATION STYLES */
-/* ------------------------------------------------------------------ */
-.k-bottom-navbar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: var(--k-surface);
-    padding: 10px 0;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-    z-index: 1000;
-}
-
-.k-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: #999;
-    font-size: 12px;
-    font-weight: 500;
-    transition: color 0.2s;
-}
-
-.k-nav-item i { font-size: 24px; margin-bottom: 4px; }
+/* 5. BOTTOM NAV */
+.k-bottom-navbar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; padding: 10px 0; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+.k-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #999; font-size: 11px; font-weight: 500; }
+.k-nav-item i { font-size: 24px; margin-bottom: 2px; }
 .k-nav-item.active { color: var(--k-primary); }
-
-/* WooCommerce Account Styles */
-.woocommerce-account .woocommerce-MyAccount-navigation,
-.woocommerce-account .woocommerce-MyAccount-content {
-    background: var(--k-surface);
-    padding: 20px;
-    border-radius: var(--k-radius-md);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-}
-
-.woocommerce-account .woocommerce-MyAccount-navigation ul { list-style: none; margin: 0; padding: 0; }
-.woocommerce-account .woocommerce-MyAccount-navigation li { margin-bottom: 10px; }
-.woocommerce-account .woocommerce-MyAccount-navigation li a {
-    text-decoration: none; color: var(--k-text-main); font-weight: 600;
-    display: block; padding: 8px 15px; border-radius: 8px; transition: background-color 0.2s;
-}
-.woocommerce-account .woocommerce-MyAccount-navigation li.is-active a,
-.woocommerce-account .woocommerce-MyAccount-navigation li a:hover {
-    background-color: var(--k-primary); color: white;
-}
-
-/* Orders View Styles */
-.k-orders-view-wrap { max-width: 480px; margin: auto; background: var(--k-bg); padding: 20px 0; }
-.k-orders-header { padding: 0 20px 20px; }
-.k-orders-header .k-title { font-size: 24px; font-weight: 800; color: var(--k-text-main); margin: 0; }
-
-.k-order-filter-tabs {
-    display: flex; justify-content: space-around; padding: 10px 20px; margin-bottom: 20px;
-    background: var(--k-surface); border-radius: var(--k-radius-md); box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-.k-order-filter-tabs .k-tab-item {
-    flex: 1; text-align: center; padding: 8px 10px; font-size: 13px; font-weight: 600;
-    color: #666; cursor: pointer; border-radius: 20px; transition: all 0.2s ease;
-}
-.k-order-filter-tabs .k-tab-item.active {
-    background-color: var(--k-primary); color: white; box-shadow: 0 4px 8px rgba(255,107,0,0.2);
-}
-
-.k-order-list { padding: 0 20px; }
-.k-order-card {
-    background: var(--k-surface); border-radius: 16px; padding: 16px;
-    margin-bottom: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
-.k-order-card-header { display: flex; align-items: center; margin-bottom: 15px; }
-.k-order-thumbnail { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; margin-right: 15px; }
-.k-order-info { flex-grow: 1; }
-.k-order-title { font-size: 14px; font-weight: 700; color: var(--k-text-main); margin-bottom: 4px; }
-.k-order-id { font-size: 12px; color: #888; }
-.k-order-total { font-size: 16px; font-weight: 800; color: var(--k-text-main); }
-.k-order-card-footer {
-    display: flex; justify-content: space-between; align-items: center;
-    border-top: 1px dashed var(--k-border); padding-top: 15px; margin-top: 15px;
-}
-.k-status-badge { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 20px; text-transform: capitalize; }
-.k-status-badge.status-processing { background-color: #FFF3E0; color: #FF9800; }
-.k-status-badge.status-completed { background-color: #E8F5E9; color: #4CAF50; }
-.k-status-badge.status-cancelled { background-color: #FFEBEE; color: #F44336; }
-.k-status-badge.status-pending { background-color: #E3F2FD; color: #2196F3; }
-
-.k-btn-view-order {
-    background: var(--k-primary); color: white; padding: 8px 15px; border-radius: 8px;
-    font-size: 12px; font-weight: 600; text-decoration: none; transition: opacity 0.2s;
-}
-
-/* Account Dashboard */
-.k-profile-header { text-align: center; background: var(--k-surface); padding: 30px 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-.k-avatar-large img { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid var(--k-primary); }
-.k-user-name { font-size: 28px; font-weight: 800; color: var(--k-text-main); margin: 0 0 5px 0; }
-.k-account-menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 576px) { .k-account-menu-grid { grid-template-columns: repeat(2, 1fr); } }
-.k-account-menu-item { display: flex; align-items: center; background: var(--k-surface); padding: 15px; border-radius: 16px; text-decoration: none; color: var(--k-text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: transform 0.2s; }
-.k-icon-menu { font-size: 22px; color: var(--k-primary); margin-right: 15px; }
-
-/* ------------------------------------------------------------------ */
-/* 4. TABLE MANAGEMENT STYLES */
-/* ------------------------------------------------------------------ */
-.text-sm { font-size: 13px !important; font-weight: 600; margin-top: 8px; color: #444; }
-.table-card { position: relative; background: white; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #eee; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-.table-card:hover { border-color: var(--k-primary); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-.table-card.add-new { border: 2px dashed #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fcfcfc; }
-.table-card.add-new:hover { border-color: var(--k-primary); background: #fff; }
-.table-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s; }
-.table-card:hover .table-actions { opacity: 1; }
-.table-actions i { font-size: 16px; padding: 4px; border-radius: 50%; background: #eee; color: #666; cursor: pointer; }
-.table-actions i:hover { background: var(--k-primary); color: white; }
-.table-actions i.delete:hover { background: #ff4444; }
-
-/* ------------------------------------------------------------------ */
-/* 5. CHECKOUT PAGE OVERRIDES */
-/* ------------------------------------------------------------------ */
-.woocommerce-checkout-payment ul.payment_methods li input[type=radio] { opacity: 0; position: absolute; width: 0; }
-.woocommerce-checkout-payment ul.payment_methods li label { display: flex !important; align-items: center; justify-content: space-between; width: 100%; cursor: pointer; }
-.woocommerce-checkout-payment ul.payment_methods li label::after { content: ''; width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 50%; display: block; margin-left: auto; flex-shrink: 0; transition: all 0.2s; }
-.woocommerce-checkout-payment ul.payment_methods li input[type=radio]:checked + label::after { border-color: #FF6B00; background-color: #FF6B00; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='12' height='12' fill='white'%3E%3Cpath d='M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; }
-.woocommerce-checkout-payment ul.payment_methods li label img { max-height: 24px; margin-right: 15px; order: -1; }
