@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Kresuber Resto Pro (Fixed)
+Plugin Name: Kresuber Resto
 Plugin URI: https://resto.kresuber.co.id/
 Description: v1.1.6 FIXES: Fixed Product Loading (AJAX), App Routing, and Dashboard UI. Implements Strict Module Loading.
 Version: 1.1.6
