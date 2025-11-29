@@ -21,6 +21,9 @@ class Kresuber_POS_Core {
 
     public function rewrites() {
         add_rewrite_rule('^pos-terminal/?$', 'index.php?kresuber_endpoint=pos', 'top');
+        add_rewrite_rule('^app/favorites/?$', 'index.php?kresuber_endpoint=app_favorites', 'top');
+        add_rewrite_rule('^app/orders/?$', 'index.php?kresuber_endpoint=app_orders', 'top');
+        add_rewrite_rule('^app/account/?$', 'index.php?kresuber_endpoint=app_account', 'top');
         add_rewrite_rule('^app/?$', 'index.php?kresuber_endpoint=app', 'top');
         add_rewrite_tag('%kresuber_endpoint%', '([^&]+)');
     }
@@ -34,14 +37,19 @@ class Kresuber_POS_Core {
         $endpoint = get_query_var('kresuber_endpoint');
         if (!$endpoint) return;
 
-        if ($endpoint === 'pos') {
-            if (!current_user_can('edit_products')) auth_redirect();
-            include KRESUBER_PATH . 'templates/app-shell.php';
-            exit;
-        }
-        
-        if ($endpoint === 'app') {
-            include KRESUBER_PATH . 'templates/user-app-shell.php';
+        $templates = [
+            'pos' => 'app-shell.php',
+            'app' => 'user-app-shell.php',
+            'app_favorites' => 'favorites-shell.php',
+            'app_orders' => 'orders-shell.php',
+            'app_account' => 'account-shell.php',
+        ];
+
+        if (isset($templates[$endpoint])) {
+            if ($endpoint === 'pos' && !current_user_can('edit_products')) {
+                auth_redirect();
+            }
+            include KRESUBER_PATH . 'templates/' . $templates[$endpoint];
             exit;
         }
     }
